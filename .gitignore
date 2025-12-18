@@ -1,0 +1,23 @@
+# Output compilazione Java / Maven
+/out/
+/target/
+
+# File di log o temporanei
+*.log
+
+# IDE vari
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
