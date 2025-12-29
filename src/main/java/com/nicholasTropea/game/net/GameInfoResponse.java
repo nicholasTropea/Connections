@@ -129,4 +129,15 @@ public class GameInfoResponse {
 
         return new GameInfoResponse(false, errorMsg, false, null, null, null, null, null, null);
     }
+
+    // Getters
+    public boolean isSuccess() { return this.success; }
+    public String getError() { return this.error; }
+    public boolean isActive() { return this.active; }
+    public Long getTimeLeft() { return this.timeLeft; }
+    public List<String> getWordsLeft() { return this.wordsLeft; }
+    public List<List<String>> getSolution() { return this.solution; }
+    public List<List<String>> getGuessedGroups() { return this.guessedGroups; }
+    public Integer getErrors() { return this.errors; }
+    public Integer getScore() { return this.score; }
 }

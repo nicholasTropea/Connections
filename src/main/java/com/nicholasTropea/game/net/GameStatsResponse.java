@@ -151,4 +151,15 @@ public class GameStatsResponse {
 
         return new GameStatsResponse(false, errorMsg, false, null, null, null, null, null, null);
     }
+
+    // Getters
+    public boolean isSuccess() { return this.success; }
+    public String getError() { return this.error; }
+    public boolean isActive() { return this.active; }
+    public Long getTimeLeft() { return this.timeLeft; }
+    public Integer getActivePlayers() { return this.activePlayers; }
+    public Integer getFinishedPlayers() { return this.finishedPlayers; }
+    public Integer getWonPlayers() { return this.wonPlayers; }
+    public Integer getTotalPlayers() { return this.totalPlayers; }
+    public Integer getAverageScore() { return this.averageScore; }
 }
