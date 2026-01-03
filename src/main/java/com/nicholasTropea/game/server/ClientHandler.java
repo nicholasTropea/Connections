@@ -52,7 +52,7 @@ public class ClientHandler implements Runnable {
             RegisterRequest req = gson.fromJson(line, RegisterRequest.class);
             System.out.println("Operazione: " + req.getOperation() + ", utente: " + req.getName());
 
-            RegisterResponse resp = new RegisterResponse("ok");
+            RegisterResponse resp = RegisterResponse.success();
             String jsonResp = gson.toJson(resp);
 
             out.println(jsonResp);
