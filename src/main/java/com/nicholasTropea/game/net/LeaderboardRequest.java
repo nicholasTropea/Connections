@@ -30,7 +30,7 @@ public class LeaderboardRequest {
     private LeaderboardRequest(String playerUsername, Integer kTopUsers, Boolean all) {
         if (
             (playerUsername == null || playerUsername.trim().isEmpty()) &&
-            (kTopUsers == null || kTopUsers == 0) &&
+            (kTopUsers == null || kTopUsers <= 0) &&
             (all == null || !all)
         ) {
             throw new IllegalArgumentException("Either playerUsername, kTopUsers > 0 or all = true must be provided");
@@ -42,25 +42,13 @@ public class LeaderboardRequest {
     }
 
     /** Tutti i giocatori (solo all) */
-    public LeaderboardRequest(boolean all) {
-        if (!all) throw new IllegalArgumentException("Parameter all must be true to request full leaderboard");
-        this(null, null, all);
-    }
+    public LeaderboardRequest(boolean all) { this(null, null, all); }
 
     /** K top utenti (solo kTopUsers) */
-    public LeaderboardRequest(int kTopUsers) {
-        if (kTopUsers <= 0) throw new IllegalArgumentException("kTopUsers must be > 0");
-        this(null, kTopUsers, null);
-    }
+    public LeaderboardRequest(int kTopUsers) { this(null, kTopUsers, null); }
 
     /** Singolo utente (solo playerUsername) */
-    public LeaderboardRequest(String playerUsername) {
-        if (playerUsername == null || playerUsername.trim().isEmpty()) {
-            throw new IllegalArgumentException("playerUsername is required");
-        }
-
-        this(playerUsername, null, null);
-    }
+    public LeaderboardRequest(String playerUsername) { this(playerUsername, null, null); }
 
     // Getters
     public String getOperation() { return this.operation; }
