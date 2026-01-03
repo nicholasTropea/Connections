@@ -30,3 +30,6 @@ lib/gson-*.jar
 classes/
 docs/
 *.class
+
+# Tips
+tips.txt
