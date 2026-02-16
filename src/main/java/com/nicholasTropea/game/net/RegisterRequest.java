@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
  * JSON atteso:
  * {
  *    "operation" : "register",
- *    "name" : "STRING",
+ *    "username" : "STRING",
  *    "psw" : "STRING"
  * } 
  */
@@ -17,24 +17,24 @@ public class RegisterRequest {
     @SerializedName("operation")
     private final String operation = "register";
 
-    @SerializedName("name")
-    private final String name;
+    @SerializedName("username")
+    private final String username;
 
     @SerializedName("psw")
     private final String password;
 
     // Costruttore
-    public RegisterRequest(String name, String password) {
-        this.name = Objects.requireNonNull(name, "Required name").trim();
+    public RegisterRequest(String username, String password) {
+        this.username = Objects.requireNonNull(username, "Required username").trim();
         this.password = Objects.requireNonNull(password, "Required password");
 
         // Altre validazioni
-        if (this.name.isEmpty()) throw new IllegalArgumentException("Name cannot be empty");
+        if (this.username.isEmpty()) throw new IllegalArgumentException("Username cannot be empty");
         if (this.password.length() < 6) throw new IllegalArgumentException("Password must be at least 6 characters");
     }
 
     // Getters
     public String getOperation() { return this.operation; }
-    public String getName() { return this.name; }
+    public String getuserName() { return this.username; }
     public String getPassword() { return this.password; }
 }

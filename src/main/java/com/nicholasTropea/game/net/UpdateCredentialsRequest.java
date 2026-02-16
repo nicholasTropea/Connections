@@ -11,14 +11,14 @@ import com.google.gson.annotations.SerializedName;
  * <pre>{@code
  * {
  *    "operation" : "updateCredentials",
- *    "oldName" : "STRING",
- *    "newName" : "STRING",
+ *    "oldUsername" : "STRING",
+ *    "newUsername" : "STRING",
  *    "oldPsw" : "STRING",
  *    "newPsw" : "STRING"
  * } 
  * }</pre>
  * 
- * Errori possibili: "oldPsw errata", "newName già registrato"...
+ * Errori possibili: "oldPsw errata", "newUsername già registrato"...
  */
 public class UpdateCredentialsRequest {
     /** Operazione effettuata */
@@ -26,16 +26,16 @@ public class UpdateCredentialsRequest {
     private final String operation = "updateCredentials";
 
     /** Attuale nome utente dell'account da cambiare */
-    @SerializedName("oldName")
-    private final String oldName;
+    @SerializedName("oldUsername")
+    private final String oldUsername;
 
     /** Attuale password dell'account da cambiare */
     @SerializedName("oldPsw")
     private final String oldPassword;
 
     /** Nuovo nome da impostare (opzionale) */
-    @SerializedName("newName")
-    private final String newName;
+    @SerializedName("newUsername")
+    private final String newUsername;
 
     /** Nuova password da impostare (opzionale, minimo 6 caratteri) */
     @SerializedName("newPsw")
@@ -46,18 +46,18 @@ public class UpdateCredentialsRequest {
      * 
      * Crea una richiesta per cambio di credenziali.
      * 
-     * @param oldName attuale nome utente dell'account da cambiare
+     * @param oldUsername attuale nome utente dell'account da cambiare
      * @param oldPsw attuale password dell'account da cambiare
-     * @param newName eventuale nuovo nome da impostare
+     * @param newUsername eventuale nuovo nome da impostare
      * @param newPassword eventuale nuova password da impostare
      */
-    public UpdateCredentialsRequest(String oldName, String oldPassword, String newName, String newPassword) {
+    public UpdateCredentialsRequest(String oldUsername, String oldPassword, String newUsername, String newPassword) {
         // Check leggero
-        validate(oldName, oldPassword, newName, newPassword);
+        validate(oldUsername, oldPassword, newUsername, newPassword);
 
-        this.oldName = oldName.trim();
+        this.oldUsername = oldUsername.trim();
         this.oldPassword = oldPassword;
-        this.newName = newName != null ? newName.trim() : "";
+        this.newUsername = newUsername != null ? newUsername.trim() : "";
         this.newPassword = newPassword != null ? newPassword : "";
     }
 
@@ -65,36 +65,36 @@ public class UpdateCredentialsRequest {
     /**
      * Valida gli argomenti passati al costruttore.
      * 
-     * @param oldName Nome attuale
+     * @param oldUsername Nome attuale
      * @param oldPassword Password attuale
-     * @param newName Nuovo nome
+     * @param newUsername Nuovo nome
      * @param newPassword Nuova password
      * 
      * @throws IllegalArgumentException se uno dei parametri è malformato
      */
-    private static void validate(String oldName, String oldPassword, String newName, String newPassword) {
-        Objects.requireNonNull(oldName, "oldName is required");
+    private static void validate(String oldUsername, String oldPassword, String newUsername, String newPassword) {
+        Objects.requireNonNull(oldUsername, "oldUsername is required");
         Objects.requireNonNull(oldPassword, "oldPassword is required");
 
         // Password o nome devono cambiare
         if (
-            (newName == null || newName.trim().isEmpty()) &&
+            (newUsername == null || newUsername.trim().isEmpty()) &&
             (newPassword == null || newPassword.isEmpty())
         ) {
             throw new IllegalArgumentException("Either password, name or both must change");
         }
 
-        if (oldName.trim().isEmpty()) throw new IllegalArgumentException("oldName cannot be empty");
+        if (oldUsername.trim().isEmpty()) throw new IllegalArgumentException("oldUsername cannot be empty");
         if (oldPassword.isEmpty()) throw new IllegalArgumentException("oldPassword cannot be empty");
         if (oldPassword.length() < 6) throw new IllegalArgumentException("OldPassword must be at least 6 characters long");
         if (newPassword != null && newPassword.length() < 6) throw new IllegalArgumentException("newPassword must be at least 6 characters long");
-        if (newName != null && newName.trim().isEmpty()) throw new IllegalArgumentException("newName cannot be empty");
+        if (newUsername != null && newUsername.trim().isEmpty()) throw new IllegalArgumentException("newUsername cannot be empty");
     }
 
     // Getters
     public String getOperation() { return this.operation; }
-    public String getOldName() { return this.oldName; }
+    public String getOldUsername() { return this.oldUsername; }
     public String getOldPassword() { return this.oldPassword; }
-    public String getNewName() { return this.newName; }
+    public String getNewUsername() { return this.newUsername; }
     public String getNewPassword() { return this.newPassword; }
 }
