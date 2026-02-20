@@ -2,6 +2,8 @@ package com.nicholasTropea.game.net;
 
 import java.util.Objects;
 import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Request;
+
 
 /**
  * Richiesta di modifica delle credenziali.
@@ -20,11 +22,7 @@ import com.google.gson.annotations.SerializedName;
  * 
  * Errori possibili: "oldPsw errata", "newUsername già registrato"...
  */
-public class UpdateCredentialsRequest {
-    /** Operazione effettuata */
-    @SerializedName("operation")
-    private final String operation = "updateCredentials";
-
+public class UpdateCredentialsRequest extends Request {
     /** Attuale nome utente dell'account da cambiare */
     @SerializedName("oldUsername")
     private final String oldUsername;
@@ -52,6 +50,8 @@ public class UpdateCredentialsRequest {
      * @param newPassword eventuale nuova password da impostare
      */
     public UpdateCredentialsRequest(String oldUsername, String oldPassword, String newUsername, String newPassword) {
+        super("updateCredentials");
+
         // Check leggero
         validate(oldUsername, oldPassword, newUsername, newPassword);
 
@@ -92,7 +92,6 @@ public class UpdateCredentialsRequest {
     }
 
     // Getters
-    public String getOperation() { return this.operation; }
     public String getOldUsername() { return this.oldUsername; }
     public String getOldPassword() { return this.oldPassword; }
     public String getNewUsername() { return this.newUsername; }

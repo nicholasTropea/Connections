@@ -3,6 +3,8 @@ package com.nicholasTropea.game.net;
 import java.util.List;
 import java.util.Objects;
 import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Request;
+
 
 /**
  * Richiesta di invio di una proposta di un giocatore.
@@ -13,15 +15,14 @@ import com.google.gson.annotations.SerializedName;
  *    "words" : ["word1", "word2", "word3", "word4"]
  * }
  */
-public class SubmitProposalRequest {
-    @SerializedName("operation")
-    private final String operation = "submitProposal";
-
+public class SubmitProposalRequest extends Request {
     @SerializedName("words")
     private final List<String> words;
 
     /** Costruttore */
     public SubmitProposalRequest(List<String> words) {
+        super("submitProposal");
+
         this.validate(words);
 
         this.words = List.copyOf(words);
@@ -43,6 +44,5 @@ public class SubmitProposalRequest {
     }
 
     // Getters
-    public String getOperation() { return this.operation; }
     public List<String> getWords() { return this.words; }
 }

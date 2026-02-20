@@ -26,7 +26,9 @@ public class ClientMain {
 
             Gson gson = new Gson();
 
-            RegisterRequest req = new RegisterRequest("Mario", "12345");
+            // RegisterRequest req = new RegisterRequest("Mario", "12345");
+            Request req = this.askForRequest(); 
+
             String jsonReq = gson.toJson(req);
 
             out.println(jsonReq);

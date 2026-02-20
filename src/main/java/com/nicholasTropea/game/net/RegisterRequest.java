@@ -2,6 +2,8 @@ package com.nicholasTropea.game.net;
 
 import java.util.Objects;
 import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Request;
+
 
 /**
  * Richiesta di registrazione di un nuovo giocatore. 
@@ -13,10 +15,7 @@ import com.google.gson.annotations.SerializedName;
  *    "psw" : "STRING"
  * } 
  */
-public class RegisterRequest {
-    @SerializedName("operation")
-    private final String operation = "register";
-
+public class RegisterRequest extends Request {
     @SerializedName("username")
     private final String username;
 
@@ -25,6 +24,8 @@ public class RegisterRequest {
 
     // Costruttore
     public RegisterRequest(String username, String password) {
+        super("register");
+
         this.username = Objects.requireNonNull(username, "Required username").trim();
         this.password = Objects.requireNonNull(password, "Required password");
 
@@ -34,7 +35,6 @@ public class RegisterRequest {
     }
 
     // Getters
-    public String getOperation() { return this.operation; }
     public String getuserName() { return this.username; }
     public String getPassword() { return this.password; }
 }

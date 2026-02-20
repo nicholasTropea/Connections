@@ -1,6 +1,8 @@
 package com.nicholasTropea.game.net;
 
 import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Request;
+
 
 /**
  * Richiesta di tutta o parte della classifica globale da un giocatore.
@@ -13,10 +15,7 @@ import com.google.gson.annotations.SerializedName;
  *    "all" : BOOLEAN
  * }
  */
-public class LeaderboardRequest {
-    @SerializedName("operation")
-    private final String operation = "requestLeaderboard";
-
+public class LeaderboardRequest extends Request {
     @SerializedName("playerName")
     private final String playerUsername;
 
@@ -28,6 +27,8 @@ public class LeaderboardRequest {
 
     /** Costruttore privato completo */
     private LeaderboardRequest(String playerUsername, Integer kTopUsers, Boolean all) {
+        super("requestLeaderboard");
+
         if (
             (playerUsername == null || playerUsername.trim().isEmpty()) &&
             (kTopUsers == null || kTopUsers <= 0) &&
@@ -51,7 +52,6 @@ public class LeaderboardRequest {
     public LeaderboardRequest(String playerUsername) { this(playerUsername, null, null); }
 
     // Getters
-    public String getOperation() { return this.operation; }
     public String getPlayerUsername() { return this.playerUsername; }
     public Integer getKTopPlayers() { return this.kTopUsers; }
     public boolean isAll() { return Boolean.TRUE.equals(this.all); }

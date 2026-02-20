@@ -1,6 +1,8 @@
 package com.nicholasTropea.game.net;
 
 import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Request;
+
 
 /**
  * Richiesta delle statistiche di una partita da un giocatore.
@@ -12,10 +14,7 @@ import com.google.gson.annotations.SerializedName;
  *    "current" : BOOLEAN
  * }
  */
-public class GameStatsRequest {
-    @SerializedName("operation")
-    private final String operation = "requestGameStats";
-
+public class GameStatsRequest extends Request {
     @SerializedName("gameId")
     private final Integer gameId; // null se current
 
@@ -24,6 +23,8 @@ public class GameStatsRequest {
 
     /** Costruttore privato completo (id + current) */
     private GameStatsRequest(Integer gameId, Boolean current) {
+        super("requestGameStats");
+
         if (gameId == null && (current == null || !current)) {
             throw new IllegalArgumentException("Either gameId or current=true must be provided");
         }
@@ -46,7 +47,6 @@ public class GameStatsRequest {
     public GameStatsRequest(boolean current) { this(null, current); }
 
     // Getters
-    public String getOperation() { return this.operation; }
     public Integer getGameId() { return this.gameId; }
     public boolean isCurrent() { return Boolean.TRUE.equals(this.current); }
 }

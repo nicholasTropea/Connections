@@ -1,6 +1,7 @@
 package com.nicholasTropea.game.net;
 
 import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Request;
 
 /**
  * Richiesta dello stato di una partita da un giocatore.
@@ -17,11 +18,7 @@ import com.google.gson.annotations.SerializedName;
  * 
  * Errori possibili: "gameId inesistente"
  */
-public class GameInfoRequest {
-    /** Operazione effettuata */
-    @SerializedName("operation")
-    private final String operation = "requestGameInfo";
-
+public class GameInfoRequest extends Request {
     /** Id della partita (null se current=true) */
     @SerializedName("gameId")
     private final Integer gameId; // null se current
@@ -36,6 +33,8 @@ public class GameInfoRequest {
      * @param current true se partita corrente, null altrimenti
      */
     private GameInfoRequest(Integer gameId, Boolean current) {
+        super("requestGameInfo");
+
         if (gameId == null && (current == null || !current)) {
             throw new IllegalArgumentException("Either gameId or current=true must be provided");
         }
@@ -66,7 +65,6 @@ public class GameInfoRequest {
     public GameInfoRequest(boolean current) { this(null, current); }
 
     // Getters
-    public String getOperation() { return this.operation; }
     public Integer getGameId() { return this.gameId; }
     public boolean getCurrent() { return Boolean.TRUE.equals(this.current); }
 }

@@ -2,6 +2,8 @@ package com.nicholasTropea.game.net;
 
 import java.util.Objects;
 import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Request;
+
 
 /**
  * Richiesta di logout di un giocatore.
@@ -11,13 +13,7 @@ import com.google.gson.annotations.SerializedName;
  *    "operation" : "logout"
  * }
  */
-public class LogoutRequest {
-    @SerializedName("operation")
-    private final String operation = "logout";
-
+public class LogoutRequest extends Request {
     // Costruttore
-    public LogoutRequest() { ; }
-
-    // Getters
-    public String getOperation() { return this.operation; }
+    public LogoutRequest() { super("logout"); }
 }

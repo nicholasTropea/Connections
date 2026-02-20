@@ -1,6 +1,8 @@
 package com.nicholasTropea.game.net;
 
 import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Request;
+
 
 /**
  * Richiesta delle statistiche del giocatore.
@@ -10,13 +12,7 @@ import com.google.gson.annotations.SerializedName;
  *    "operation" : "requestPlayerStats"
  * }
  */
-public class PlayerStatsRequest {
-    @SerializedName("operation")
-    private final String operation = "requestPlayerStats";
-
+public class PlayerStatsRequest extends Request {
     /** Costruttore */
-    public PlayerStatsRequest() { ; }
-
-    // Getters
-    public String getOperation() { return this.operation; }
+    public PlayerStatsRequest() { super("requestPlayerStats"); }
 }
