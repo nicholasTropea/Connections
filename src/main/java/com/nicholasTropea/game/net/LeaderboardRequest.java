@@ -70,7 +70,7 @@ public class LeaderboardRequest extends Request {
      * @param scan The Scanner to read user input from
      * @return A new LeaderboardRequest configured based on user selection
      */
-    public static Request createRequest(Scanner scan) {
+    public static LeaderboardRequest createRequest(Scanner scan) {
         int selection = getSelection(scan);
 
         switch (selection) {
