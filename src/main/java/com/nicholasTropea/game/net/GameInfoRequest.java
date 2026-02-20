@@ -138,7 +138,7 @@ public class GameInfoRequest extends Request {
         do {
             if (id != -1) {
                 System.out.println(
-                    "Invalid k: " +
+                    "Invalid game id: " +
                     id +
                     ". Please enter an integer between 0 and 911."
                 );
@@ -187,5 +187,5 @@ public class GameInfoRequest extends Request {
      * 
      * @return true if requesting the current game, false otherwise
      */
-    public boolean getCurrent() { return Boolean.TRUE.equals(this.current); }
+    public boolean isCurrent() { return Boolean.TRUE.equals(this.current); }
 }
