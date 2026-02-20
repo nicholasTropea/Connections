@@ -35,7 +35,12 @@ public class SubmitProposalResponse {
     private final String groupName;
     
     /** Costruttore */
-    private SubmitProposalResponse(boolean success, String error, Boolean result, String groupName) {
+    private SubmitProposalResponse(
+        boolean success,
+        String error,
+        Boolean result,
+        String groupName
+    ) {
         this.success = success;
         this.error = error;
         this.result = result;
@@ -49,11 +54,15 @@ public class SubmitProposalResponse {
      */
     public static SubmitProposalResponse success(boolean result, String groupName) {
         if (result && (groupName == null || groupName.trim().isEmpty())) {
-            throw new IllegalArgumentException("If result=true then groupName cannot be empty or null");
+            throw new IllegalArgumentException(
+                "If result=true then groupName cannot be empty or null"
+            );
         }
 
         if (!result && groupName != null) {
-            throw new IllegalArgumentException("If result=false then groupName must be null");
+            throw new IllegalArgumentException(
+                "If result=false then groupName must be null"
+            );
         }
         
         return new SubmitProposalResponse(true, null, result, groupName);

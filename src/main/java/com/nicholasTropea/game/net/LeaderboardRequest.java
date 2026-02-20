@@ -34,7 +34,9 @@ public class LeaderboardRequest extends Request {
             (kTopUsers == null || kTopUsers <= 0) &&
             (all == null || !all)
         ) {
-            throw new IllegalArgumentException("Either playerUsername, kTopUsers > 0 or all = true must be provided");
+            throw new IllegalArgumentException(
+                "Either playerUsername, kTopUsers > 0 or all = true must be provided"
+            );
         }
 
         this.playerUsername = playerUsername;

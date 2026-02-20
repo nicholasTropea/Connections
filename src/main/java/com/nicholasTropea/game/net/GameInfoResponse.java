@@ -32,7 +32,10 @@ public class GameInfoResponse {
     @SerializedName("error")
     private final String error;
 
-    /** Stato della partita (true se partita in corso e non terminata, false altrimenti) */
+    /**
+     *  Stato della partita
+     *  (true se partita in corso e non terminata, false altrimenti)
+     */
     @SerializedName("active")
     private final boolean active;
 
@@ -88,7 +91,8 @@ public class GameInfoResponse {
      * Se active == true: timeLeft e wordsLeft != null, solution == null
      * Se active == false: solution != null, timeLeft e wordsLeft == null
      * 
-     * @param active true se partita corrente e non terminata dal giocatore, false altrimenti
+     * @param active true se partita corrente e non terminata dal giocatore,
+     * false altrimenti
      * @param timeLeft tempo rimanente della partita in millisecondi
      * @param wordsLeft parole rimaste da raggruppare
      * @param solution assegnazione corretta delle parole
@@ -111,8 +115,31 @@ public class GameInfoResponse {
             throw new IllegalArgumentException("errors and score cannot be null");
         }
 
-        if (active) return new GameInfoResponse(true, null, true, timeLeft, wordsLeft, null, guessedGroups, errors, score);
-        return new GameInfoResponse(true, null, false, null, null, solution, guessedGroups, errors, score);
+        if (active) {
+            return new GameInfoResponse(
+                true,
+                null,
+                true,
+                timeLeft,
+                wordsLeft,
+                null,
+                guessedGroups,
+                errors,
+                score
+            );
+        }
+
+        return new GameInfoResponse(
+            true,
+            null,
+            false,
+            null,
+            null,
+            solution,
+            guessedGroups,
+            errors,
+            score
+        );
     }
 
     /**
@@ -127,7 +154,17 @@ public class GameInfoResponse {
             throw new IllegalArgumentException("Error message must be provided");
         }
 
-        return new GameInfoResponse(false, errorMsg, false, null, null, null, null, null, null);
+        return new GameInfoResponse(
+            false,
+            errorMsg,
+            false,
+            null,
+            null,
+            null, 
+            null,
+            null,
+            null
+        );
     }
 
     // Getters

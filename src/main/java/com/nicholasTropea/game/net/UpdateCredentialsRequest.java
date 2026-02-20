@@ -49,7 +49,12 @@ public class UpdateCredentialsRequest extends Request {
      * @param newUsername eventuale nuovo nome da impostare
      * @param newPassword eventuale nuova password da impostare
      */
-    public UpdateCredentialsRequest(String oldUsername, String oldPassword, String newUsername, String newPassword) {
+    public UpdateCredentialsRequest(
+        String oldUsername,
+        String oldPassword,
+        String newUsername,
+        String newPassword
+    ) {
         super("updateCredentials");
 
         // Check leggero
@@ -72,7 +77,12 @@ public class UpdateCredentialsRequest extends Request {
      * 
      * @throws IllegalArgumentException se uno dei parametri è malformato
      */
-    private static void validate(String oldUsername, String oldPassword, String newUsername, String newPassword) {
+    private static void validate(
+        String oldUsername,
+        String oldPassword,
+        String newUsername,
+        String newPassword
+    ) {
         Objects.requireNonNull(oldUsername, "oldUsername is required");
         Objects.requireNonNull(oldPassword, "oldPassword is required");
 
@@ -81,14 +91,34 @@ public class UpdateCredentialsRequest extends Request {
             (newUsername == null || newUsername.trim().isEmpty()) &&
             (newPassword == null || newPassword.isEmpty())
         ) {
-            throw new IllegalArgumentException("Either password, name or both must change");
+            throw new IllegalArgumentException(
+                "Either password, name or both must change"
+            );
         }
 
-        if (oldUsername.trim().isEmpty()) throw new IllegalArgumentException("oldUsername cannot be empty");
-        if (oldPassword.isEmpty()) throw new IllegalArgumentException("oldPassword cannot be empty");
-        if (oldPassword.length() < 6) throw new IllegalArgumentException("OldPassword must be at least 6 characters long");
-        if (newPassword != null && newPassword.length() < 6) throw new IllegalArgumentException("newPassword must be at least 6 characters long");
-        if (newUsername != null && newUsername.trim().isEmpty()) throw new IllegalArgumentException("newUsername cannot be empty");
+        if (oldUsername.trim().isEmpty()) {
+            throw new IllegalArgumentException("oldUsername cannot be empty");
+        }
+
+        if (oldPassword.isEmpty()) {
+            throw new IllegalArgumentException("oldPassword cannot be empty");
+        }
+
+        if (oldPassword.length() < 6) {
+            throw new IllegalArgumentException(
+                "OldPassword must be at least 6 characters long"
+            );
+        }
+
+        if (newPassword != null && newPassword.length() < 6) {
+            throw new IllegalArgumentException(
+                "newPassword must be at least 6 characters long"
+            );
+        }
+
+        if (newUsername != null && newUsername.trim().isEmpty()) {
+            throw new IllegalArgumentException("newUsername cannot be empty");
+        }
     }
 
     // Getters

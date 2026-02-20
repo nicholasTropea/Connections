@@ -3,6 +3,7 @@ package com.nicholasTropea.game.net;
 import com.google.gson.annotations.SerializedName;
 import com.nicholasTropea.game.net.Request;
 
+
 /**
  * Richiesta dello stato di una partita da un giocatore.
  * Riceve una {@link GameInfoResponse}.
@@ -27,6 +28,7 @@ public class GameInfoRequest extends Request {
     @SerializedName("current")
     private final Boolean current;
 
+
     /**
      * Costruttore privato completo.
      * @param gameId id della partita
@@ -36,19 +38,24 @@ public class GameInfoRequest extends Request {
         super("requestGameInfo");
 
         if (gameId == null && (current == null || !current)) {
-            throw new IllegalArgumentException("Either gameId or current=true must be provided");
+            throw new IllegalArgumentException(
+                "Either gameId or current=true must be provided"
+            );
         }
 
         if (gameId != null) {
             final int MIN_ID = 0;
             final int MAX_ID = 911;
 
-            if (gameId < MIN_ID || gameId > MAX_ID) throw new IllegalArgumentException("Game id must be between 0 and 911");
+            if (gameId < MIN_ID || gameId > MAX_ID) {
+                throw new IllegalArgumentException("Game id must be between 0 and 911");
+            } 
         }
 
         this.gameId = gameId;
         this.current = current;
     }
+
 
     /**
      * Costruttore per partita specifica (solo game id)
@@ -57,12 +64,14 @@ public class GameInfoRequest extends Request {
      */
     public GameInfoRequest(int gameId) { this(gameId, null); }
 
+
     /**
      * Costruttore per partita corrente (solo current)
      * 
      * @param current flag per partita corrente 
      */
     public GameInfoRequest(boolean current) { this(null, current); }
+
 
     // Getters
     public Integer getGameId() { return this.gameId; }

@@ -51,7 +51,12 @@ public class LeaderboardResponse {
      * @return istanza con success=true e error=null
      */
     public static LeaderboardResponse success(List<LeaderboardRecord> records) {
-        if (records == null) throw new IllegalArgumentException("records cannot be null, if no records should be returned, return an empty list");
+        if (records == null) {
+            throw new IllegalArgumentException(
+                "records cannot be null, if no records should be returned, 
+                return an empty list"
+            );
+        }
 
         return new LeaderboardResponse(true, null, records);
     }

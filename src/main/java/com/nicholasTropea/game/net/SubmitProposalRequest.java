@@ -36,10 +36,14 @@ public class SubmitProposalRequest extends Request {
     private void validate(List<String> words) {
         Objects.requireNonNull(words, "Words list is required");
 
-        if (words.size() != 4) throw new IllegalArgumentException("Exactly 4 words are required");
+        if (words.size() != 4) {
+            throw new IllegalArgumentException("Exactly 4 words are required");
+        }
 
         for (String word : words) {
-            if (word == null || word.trim().isEmpty()) throw new IllegalArgumentException("Words cannot be null or empty");
+            if (word == null || word.trim().isEmpty()) {
+                throw new IllegalArgumentException("Words cannot be null or empty");
+            }
         }
     }
 

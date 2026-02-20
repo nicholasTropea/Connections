@@ -42,8 +42,13 @@ public class LoginRequest extends Request {
         this.password = Objects.requireNonNull(password, "Required password");
 
         // Altre validazioni
-        if (this.username.isEmpty()) throw new IllegalArgumentException("Username cannot be empty");
-        if (this.password.length() < 6) throw new IllegalArgumentException("Password must be at least 6 characters");
+        if (this.username.isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be empty");
+        }
+
+        if (this.password.length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters");
+        }
     }
 
     // Getters

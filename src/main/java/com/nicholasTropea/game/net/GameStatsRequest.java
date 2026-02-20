@@ -26,14 +26,18 @@ public class GameStatsRequest extends Request {
         super("requestGameStats");
 
         if (gameId == null && (current == null || !current)) {
-            throw new IllegalArgumentException("Either gameId or current=true must be provided");
+            throw new IllegalArgumentException(
+                "Either gameId or current=true must be provided"
+            );
         }
         
         if (gameId != null) {
             final int MIN_ID = 0;
             final int MAX_ID = 911;
 
-            if (gameId < MIN_ID || gameId > MAX_ID) throw new IllegalArgumentException("Game id must be between 0 and 911");
+            if (gameId < MIN_ID || gameId > MAX_ID) {
+                throw new IllegalArgumentException("Game id must be between 0 and 911");
+            }
         }
 
         this.gameId = gameId;

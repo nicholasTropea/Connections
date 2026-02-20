@@ -84,14 +84,19 @@ public class GameStatsResponse {
 
     /**
      * Crea una risposta di successo.
-     * Se active == true: timeLeft e activePlayers != null, averageScore e totalPlayers == null
-     * Se active == false: averageScore e totalPlayers != null, timeLeft e activePlayers == null
+     * Se active == true:
+     *      timeLeft e activePlayers != null,
+     *      averageScore e totalPlayers == null
+     * Se active == false:
+     *      averageScore e totalPlayers != null,
+     *      timeLeft e activePlayers == null
      * 
      * @param active true se la partita non è terminata, false altrimenti
      * @param timeLeft tempo rimanente della partita in millisecondi
      * @param activePlayers numero di giocatori con la partita ancora in corso
      * @param finishedPlayers numero di giocatori che hanno concluso la partita
-     * @param wonPlayers numero di giocatori che hanno concluso la partita con una vittoria
+     * @param wonPlayers numero di giocatori che hanno
+     *                   concluso la partita con una vittoria
      * @param totalPlayers numero di giocatori che hanno partecipato alla partita
      * @param averageScore punteggio medio ottenuto dai giocatori
      * 
@@ -107,7 +112,9 @@ public class GameStatsResponse {
         Float averageScore
     ) {
         if (finishedPlayers == null || wonPlayers == null) {
-            throw new IllegalArgumentException("finishedPlayers and wonPlayers cannot be null");
+            throw new IllegalArgumentException(
+                "finishedPlayers and wonPlayers cannot be null"
+            );
         }
 
         if (active) {
@@ -149,7 +156,17 @@ public class GameStatsResponse {
             throw new IllegalArgumentException("Error message must be provided");
         }
 
-        return new GameStatsResponse(false, errorMsg, false, null, null, null, null, null, null);
+        return new GameStatsResponse(
+            false,
+            errorMsg,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
     }
 
     // Getters

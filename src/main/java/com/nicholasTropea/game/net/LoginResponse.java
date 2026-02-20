@@ -83,7 +83,8 @@ public class LoginResponse {
      * 
      * @param gameId id della partita corrente
      * @param words lista di parole della partita corrente
-     * @param guessedGroups lista di gruppi di parole già indovinate della partita corrente
+     * @param guessedGroups lista di gruppi di parole già indovinate
+     *                      della partita corrente
      * @param timeLeft tempo rimanente della partita corrente in millisecondi
      * @param errors numero di errori già commessi nella partita corrente
      * @param score punteggio ottenuto nella partita corrente
@@ -101,7 +102,16 @@ public class LoginResponse {
         // Check leggero
         validateSuccess(gameId, words);
 
-        return new LoginResponse(true, null, gameId, words, guessedGroups, timeLeft, errors, score);
+        return new LoginResponse(
+            true,
+            null,
+            gameId,
+            words,
+            guessedGroups,
+            timeLeft,
+            errors,
+            score
+        );
     }
 
     /**
@@ -133,7 +143,9 @@ public class LoginResponse {
             throw new IllegalArgumentException("gameId must be between 0 and 911");
         }
 
-        if (words == null || words.size() != 16) throw new IllegalArgumentException("words must contain 16 words");
+        if (words == null || words.size() != 16) {
+            throw new IllegalArgumentException("words must contain 16 words");
+        }
     }
 
     // Getters

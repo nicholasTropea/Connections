@@ -117,7 +117,12 @@ public class PlayerStatsResponse {
             solved < 0 || failed < 0 || unfinished < 0 ||
             perfect < 0 || winRate < 0 || lossRate < 0 ||
             currentStreak < 0 || maxStreak < 0 || maxStreak < currentStreak
-        ) { throw new IllegalArgumentException("puzzle, streak and rate parameters cannot be < 0, maxStreak cannot be < currentStreak"); }
+        ) {
+            throw new IllegalArgumentException(
+                "puzzle, streak and rate parameters cannot be < 0,
+                maxStreak cannot be < currentStreak"
+            );
+        }
 
         return new PlayerStatsResponse(
             true, null, solved,
@@ -139,7 +144,19 @@ public class PlayerStatsResponse {
             throw new IllegalArgumentException("Error message must be provided");
         }
 
-        return new PlayerStatsResponse(false, errorMsg, null, null, null, null, null, null, null, null, null);
+        return new PlayerStatsResponse(
+            false,
+            errorMsg,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
     }
 
     // Getters
@@ -153,5 +170,6 @@ public class PlayerStatsResponse {
     public Float getLossRate() { return this.lossRate; }
     public Integer getCurrentStreak() { return this.currentStreak; }
     public Integer getMaxStreak() { return this.maxStreak; }
-    public MistakeHistogram getHistogram() { return this.histogram; } // Non una copia, tanto è usa e getta
+    // Non una copia, tanto è usa e getta
+    public MistakeHistogram getHistogram() { return this.histogram; }
 }
