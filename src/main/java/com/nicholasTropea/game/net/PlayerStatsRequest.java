@@ -1,18 +1,33 @@
 package com.nicholasTropea.game.net;
 
-import com.google.gson.annotations.SerializedName;
 import com.nicholasTropea.game.net.Request;
 
 
 /**
- * Richiesta delle statistiche del giocatore.
+ * Request for the stats of the player.
  * 
- * JSON atteso:
+ * Expected JSON format:
+ * {@code
  * {
- *    "operation" : "requestPlayerStats"
+ *    "operation": "requestPlayerStats"
  * }
+ * }
+ * 
+ * @see PlayerStatsResponse for the server response
  */
 public class PlayerStatsRequest extends Request {
-    /** Costruttore */
+    /**
+     * Constructs a PlayerStatsRequest with the requestPlayerStats operation type.
+     */
     public PlayerStatsRequest() { super("requestPlayerStats"); }
+
+
+    /**
+     * Factory method to create a new PlayerStatsRequest instance.
+     * 
+     * @return a new PlayerStatsRequest
+     */
+    public static PlayerStatsRequest createRequest() {
+        return new PlayerStatsRequest();
+    }
 }
