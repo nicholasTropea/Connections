@@ -97,11 +97,11 @@ public abstract class Request {
         
         switch (type) {
             case LOGIN -> { return LoginRequest.createRequest(scan); }
-            case LOGOUT -> { return LogoutRequest.createRequest(scan); }
+            case LOGOUT -> { return LogoutRequest.createRequest(); }
             case REGISTER -> { return RegisterRequest.createRequest(scan); }
             case GAMEINFOREQUEST -> { return GameInfoRequest.createRequest(scan); }
             case GAMESTATSREQUEST -> { return GameStatsRequest.createRequest(scan); }
-            case PLAYERSTATSREQUEST -> { return PlayerStatsRequest.createRequest(scan); }
+            case PLAYERSTATSREQUEST -> { return PlayerStatsRequest.createRequest(); }
             case LEADERBOARDREQUEST -> { return LeaderboardRequest.createRequest(scan); }
             case SUBMITPROPOSALREQUEST -> {
                 return SubmitProposalRequest.createRequest(scan);
@@ -122,7 +122,7 @@ public abstract class Request {
      *
      * @return a new instance of the request with user-provided parameters
      */
-    public abstract Request createRequest();
+    public static Request createRequest() { return null; }
 
 
     /**
