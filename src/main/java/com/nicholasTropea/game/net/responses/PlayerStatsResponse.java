@@ -119,8 +119,8 @@ public class PlayerStatsResponse {
             currentStreak < 0 || maxStreak < 0 || maxStreak < currentStreak
         ) {
             throw new IllegalArgumentException(
-                "puzzle, streak and rate parameters cannot be < 0,
-                maxStreak cannot be < currentStreak"
+                "puzzle, streak and rate parameters cannot be < 0, " +
+                "maxStreak cannot be < currentStreak"
             );
         }
 

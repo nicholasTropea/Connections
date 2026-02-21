@@ -53,8 +53,8 @@ public class LeaderboardResponse {
     public static LeaderboardResponse success(List<LeaderboardRecord> records) {
         if (records == null) {
             throw new IllegalArgumentException(
-                "records cannot be null, if no records should be returned, 
-                return an empty list"
+                "records cannot be null, if no records should be returned, " +
+                "return an empty list"
             );
         }
 
