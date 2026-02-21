@@ -1,4 +1,4 @@
-package com.nicholasTropea.game.net;
+package com.nicholasTropea.game.net.responses;
 
 import com.google.gson.annotations.SerializedName;
 import com.nicholasTropea.game.model.MistakeHistogram;

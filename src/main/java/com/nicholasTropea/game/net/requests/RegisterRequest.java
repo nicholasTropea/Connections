@@ -1,4 +1,4 @@
-package com.nicholasTropea.game.net;
+package com.nicholasTropea.game.net.requests;
 
 import java.util.Objects;
 import java.util.Scanner;

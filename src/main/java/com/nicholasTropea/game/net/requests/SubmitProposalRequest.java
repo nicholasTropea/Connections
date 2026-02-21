@@ -1,4 +1,4 @@
-package com.nicholasTropea.game.net;
+package com.nicholasTropea.game.net.requests;
 
 import java.util.ArrayList;
 import java.util.List;
