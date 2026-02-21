@@ -9,65 +9,64 @@ import com.google.gson.annotations.SerializedName;
 
 
 /**
- * Enumeration for various types of requests
- */
-public enum RequestTypes {
-    REGISTER(1, "Register"),
-    LOGIN(2, "Login"),
-    LOGOUT(3, "Logout"),
-    GAMEINFOREQUEST(4, "Request game information"),
-    GAMESTATSREQUEST(5, "Request game stats"),
-    LEADERBOARDREQUEST(6, "Request leaderboard"),
-    PLAYERSTATSREQUEST(7, "Request player stats"),
-    SUBMITPROPOSALREQUEST(8, "Submit a guess"),
-    UPDATECREDENTIALSREQUEST(9, "Update credentials");
-
-    private final int code;
-    private final String action;
-
-
-    RequestTypes(int code, String action) {
-        this.code = code;
-        this.action = action;
-    }
-
-
-    /**
-     * Looks up a RequestTypes enum by its code
-     *
-     * @param code the code to look up
-     * @return the corresponding RequestTypes
-     * @throws IllegalArgumentException if no matching code is found
-     */
-    public static RequestTypes fromCode(int code) {
-        for (RequestTypes type : RequestTypes.values()) {
-            if (type.code == code) return type;
-        }
-
-        throw new IllegalArgumentException("Invalid code: " + code);
-    }
-
-
-    /**
-     * Gets the integer code associated with this request type
-     *
-     * @return the code
-     */
-    public int getCode() { return this.code; }
-
-    /**
-     * Gets the human-readable action description for this request type
-     *
-     * @return the action description
-     */
-    public String getAction() { return this.action; }
-}
-
-
-/**
  * Abstract factory class for creating and managing different types of requests
  */
 public abstract class Request {
+    /**
+     * Enumeration for various types of requests
+     */
+    public enum RequestTypes {
+        REGISTER(1, "Register"),
+        LOGIN(2, "Login"),
+        LOGOUT(3, "Logout"),
+        GAMEINFOREQUEST(4, "Request game information"),
+        GAMESTATSREQUEST(5, "Request game stats"),
+        LEADERBOARDREQUEST(6, "Request leaderboard"),
+        PLAYERSTATSREQUEST(7, "Request player stats"),
+        SUBMITPROPOSALREQUEST(8, "Submit a guess"),
+        UPDATECREDENTIALSREQUEST(9, "Update credentials");
+
+        private final int code;
+        private final String action;
+
+
+        RequestTypes(int code, String action) {
+            this.code = code;
+            this.action = action;
+        }
+
+
+        /**
+         * Looks up a RequestTypes enum by its code
+         *
+         * @param code the code to look up
+         * @return the corresponding RequestTypes
+         * @throws IllegalArgumentException if no matching code is found
+         */
+        public static RequestTypes fromCode(int code) {
+            for (RequestTypes type : RequestTypes.values()) {
+                if (type.code == code) return type;
+            }
+
+            throw new IllegalArgumentException("Invalid code: " + code);
+        }
+
+
+        /**
+         * Gets the integer code associated with this request type
+         *
+         * @return the code
+         */
+        public int getCode() { return this.code; }
+
+        /**
+         * Gets the human-readable action description for this request type
+         *
+         * @return the action description
+         */
+        public String getAction() { return this.action; }
+    }
+
     /**
      * The operation type that this request represents
      */
@@ -97,13 +96,13 @@ public abstract class Request {
         Scanner scan = new Scanner(System.in);
         
         switch (type) {
-            case LOGIN -> return LoginRequest.createRequest(scan);
-            case LOGOUT -> return LogoutRequest.createRequest(scan);
-            case REGISTER -> return RegisterRequest.createRequest(scan);
-            case GAMEINFOREQUEST -> return GameInfoRequest.createRequest(scan);
-            case GAMESTATSREQUEST -> return GameStatsRequest.createRequest(scan);
-            case PLAYERSTATSREQUEST -> return PlayerStatsRequest.createRequest(scan);
-            case LEADERBOARDREQUEST -> return LeaderboardRequest.createRequest(scan);
+            case LOGIN -> { return LoginRequest.createRequest(scan); }
+            case LOGOUT -> { return LogoutRequest.createRequest(scan); }
+            case REGISTER -> { return RegisterRequest.createRequest(scan); }
+            case GAMEINFOREQUEST -> { return GameInfoRequest.createRequest(scan); }
+            case GAMESTATSREQUEST -> { return GameStatsRequest.createRequest(scan); }
+            case PLAYERSTATSREQUEST -> { return PlayerStatsRequest.createRequest(scan); }
+            case LEADERBOARDREQUEST -> { return LeaderboardRequest.createRequest(scan); }
             case SUBMITPROPOSALREQUEST -> {
                 return SubmitProposalRequest.createRequest(scan);
             }
