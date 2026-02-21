@@ -55,10 +55,6 @@ public class RequestDeserializer implements JsonDeserializer<Request> {
                 return context.deserialize(json, LeaderboardRequest.class);
             }
 
-            case "requestGameStats" -> {
-                return context.deserialize(json, GameStatsRequest.class);
-            }
-
             case "login" -> {
                 return context.deserialize(json, LoginRequest.class);
             }
