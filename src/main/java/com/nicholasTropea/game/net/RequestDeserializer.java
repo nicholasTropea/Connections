@@ -1,3 +1,15 @@
+package com.nicholasTropea.game.net;
+
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonObject;
+import com.google.gson.Type;
+
+import com.nicholasTropea.game.net.requests.*;
+
+
 /**
  * Custom JSON deserializer for Request objects.
  * <p>
@@ -27,7 +39,7 @@ public class RequestDeserializer implements JsonDeserializer<Request> {
         JsonDeserializationContext context
     ) throws JsonParseException {
         JsonObject obj = json.getAsJsonObject();
-        String type = obj.get("operation").getAsString():
+        String type = obj.get("operation").getAsString();
 
         switch (type) {
             case "requestGameInfo" -> {
