@@ -1,35 +1,57 @@
 package com.nicholasTropea.game.net;
 
 import java.util.Objects;
+import java.util.Scanner;
+
 import com.google.gson.annotations.SerializedName;
 import com.nicholasTropea.game.net.Request;
 
 
 /**
- * Richiesta di registrazione di un nuovo giocatore. 
+ * Request to register a new player account on the game server.
+ * Receives a {@link RegisterResponse}.
  * 
- * JSON atteso:
+ * <p>Expected JSON format:
+ * <pre>{@code
  * {
- *    "operation" : "register",
- *    "username" : "STRING",
- *    "psw" : "STRING"
- * } 
+ *    "operation": "register",
+ *    "username": "STRING",
+ *    "psw": "STRING"
+ * }
+ * }</pre>
+ * 
+ * <p>Validation rules: Username must not be empty, password must be at least 6 characters.
+ * <p>Possible errors: "username already registered", "invalid credentials"
  */
 public class RegisterRequest extends Request {
+    /**
+     * The username for the new account.
+     */
     @SerializedName("username")
     private final String username;
 
+    /**
+     * The password for the new account.
+     */
     @SerializedName("psw")
     private final String password;
 
-    // Costruttore
+
+    /**
+     * Constructs a register request with the provided credentials.
+     * Validates that username is not empty and password meets minimum length requirements.
+     * 
+     * @param username The username for the new account (must not be empty)
+     * @param password The password for the new account (must be at least 6 characters)
+     * @throws NullPointerException if either username or password is null
+     * @throws IllegalArgumentException if username is empty or password is too short
+     */
     public RegisterRequest(String username, String password) {
         super("register");
 
-        this.username = Objects.requireNonNull(username, "Required username").trim();
-        this.password = Objects.requireNonNull(password, "Required password");
+        this.username = Objects.requireNonNull(username, "Username is required").trim();
+        this.password = Objects.requireNonNull(password, "Password is required");
 
-        // Altre validazioni
         if (this.username.isEmpty()) {
             throw new IllegalArgumentException("Username cannot be empty");
         }
@@ -39,7 +61,59 @@ public class RegisterRequest extends Request {
         }
     }
 
-    // Getters
-    public String getuserName() { return this.username; }
+
+    /**
+     * Prompts the user to enter registration credentials (username and password).
+     * Validates input and re-prompts on blank entries.
+     * 
+     * @param scan The Scanner to read user input from
+     * @return A new RegisterRequest with the entered credentials
+     * @throws IllegalArgumentException if credentials don't meet validation requirements
+     */
+    public static RegisterRequest createRequest(Scanner scan) {
+        String username = getValidInput(scan, "Username");
+        String password = getValidInput(scan, "Password");
+
+        return new RegisterRequest(username, password);
+    }
+
+
+    /**
+     * Prompts the user to enter information of a specified type.
+     * Validates that the input is not empty and re-prompts on blank input.
+     * 
+     * @param scan The Scanner to read user input from
+     * @param inputType The type of input being requested (e.g., "Username", "Password")
+     * @return The entered input as a non-empty String
+     */
+    private static String getValidInput(Scanner scan, String inputType) {
+        String input = null;
+
+        do {
+            if (input != null) {
+                System.out.println(inputType + " can't be empty.");
+            }
+
+            System.out.print("Enter the player " + inputType + ":");
+            input = scan.nextLine().trim();
+        } while (input.isEmpty());
+
+        return input;
+    }
+
+
+    /**
+     * Gets the username for this registration request.
+     * 
+     * @return The username
+     */
+    public String getUsername() { return this.username; }
+
+
+    /**
+     * Gets the password for this registration request.
+     * 
+     * @return The password
+     */
     public String getPassword() { return this.password; }
 }
