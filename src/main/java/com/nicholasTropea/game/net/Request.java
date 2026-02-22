@@ -117,7 +117,7 @@ public abstract class Request {
 
 
     /**
-     * Abstract factory method that subclasses implement to create new instances
+     * Factory method that subclasses implement to create new instances
      * by prompting for parameters
      *
      * @return a new instance of the request with user-provided parameters
