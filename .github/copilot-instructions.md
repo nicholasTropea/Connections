@@ -45,8 +45,11 @@ Every network operation requires a matching pair:
 - Example: `public LogoutRequest() { super("logout"); }`
 
 ### 4. Code Quality Issues (Watch For)
+- Lines must not exceed **90 columns**
+- Use **2 empty lines** in between classes and/or methods
+- All classes and methods must have a **JavaDoc comment**
+- Use PascalCase for classes and camelCase for other things 
 - Classes often have **unused imports** (`Objects`, `SerializedName` where not used)—clean these up
-- Check for **redundant factory methods** like `createRequest()` that just call `new`—consolidate if pattern inconsistent
 - Avoid hardcoding in factory methods; pass parameters
 
 ## Build & Development
