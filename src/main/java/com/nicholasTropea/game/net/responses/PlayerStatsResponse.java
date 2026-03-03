@@ -2,11 +2,12 @@ package com.nicholasTropea.game.net.responses;
 
 import com.google.gson.annotations.SerializedName;
 import com.nicholasTropea.game.model.MistakeHistogram;
+import com.nicholasTropea.game.net.Response;
 
 /**
- * Risposta ad una richiesta di {@link PlayerStatsRequest}.
+ * Response to a {@link PlayerStatsRequest}.
  * 
- * JSON atteso:
+ * Expected JSON format:
  * <pre>{@code
  * {
  *      "success" : BOOLEAN,
@@ -23,54 +24,62 @@ import com.nicholasTropea.game.model.MistakeHistogram;
  * }
  * }</pre>
  * 
- * Errori possibili: "utente non loggato"
+ * Possible errors: "user not logged in"
  */
-public class PlayerStatsResponse {
-    /** true se richiesta avvenuta con successo, false altrimenti */
-    @SerializedName("success")
-    private final boolean success;
-        
-    /** Messaggio d'errore (null se success=true) */
-    @SerializedName("error")
-    private final String error;
+public class PlayerStatsResponse extends Response {
 
-    /** Numero di puzzle risolti */
+    /** Number of solved puzzles */
     @SerializedName("solvedPuzzles")
     private final Integer solved;
         
-    /** Numero di puzzle persi */
+    /** Number of failed puzzles */
     @SerializedName("failedPuzzles")
     private final Integer failed;
 
-    /** Numero di puzzle non finiti */
+    /** Number of unfinished puzzles */
     @SerializedName("unfinishedPuzzles")
     private final Integer unfinished;
         
-    /** Numero di puzzle risolti senza errori */
+    /** Number of puzzles solved without errors */
     @SerializedName("perfectPuzzles")
     private final Integer perfect;
 
-    /** Winrate */
+    /** Win rate */
     @SerializedName("winRate")
     private final Float winRate;
 
-    /** Lossrate */
+    /** Loss rate */
     @SerializedName("lossRate")
     private final Float lossRate;
 
-    /** Streak di vittorie attuale */
+    /** Current win streak */
     @SerializedName("currentStreak")
     private final Integer currentStreak;    
 
-    /** Massima streak di vittorie ottenuta */
+    /** Maximum win streak achieved */
     @SerializedName("maxStreak")
     private final Integer maxStreak;
 
-    /** Attuale istogramma delle partite dell'utente */
+    /** Current histogram of the user's games */
     @SerializedName("histogram")
     private final MistakeHistogram histogram;
 
-    /** Costruttore */
+
+    /**
+     * Private constructor for creating player stats responses.
+     *
+     * @param success Whether the request was successful
+     * @param error Error message if unsuccessful
+     * @param solved Number of solved puzzles
+     * @param failed Number of failed puzzles
+     * @param unfinished Number of unfinished puzzles
+     * @param perfect Number of perfect puzzles
+     * @param winRate Win rate
+     * @param lossRate Loss rate
+     * @param currentStreak Current win streak
+     * @param maxStreak Maximum win streak
+     * @param histogram Mistake histogram
+     */
     private PlayerStatsResponse(
         boolean success,
         String error,
@@ -84,8 +93,7 @@ public class PlayerStatsResponse {
         Integer maxStreak,
         MistakeHistogram histogram
     ) {
-        this.success = success;
-        this.error = error;
+        super("requestPlayerStats", success, error);
         this.solved = solved;
         this.failed = failed;
         this.unfinished = unfinished;
@@ -97,10 +105,22 @@ public class PlayerStatsResponse {
         this.histogram = histogram;
     }
 
+
     /**
-     * Crea una risposta di successo.
+     * Creates a successful player stats response.
      * 
-     * @return istanza con success=true e error=null
+     * @param solved Number of solved puzzles
+     * @param failed Number of failed puzzles
+     * @param unfinished Number of unfinished puzzles
+     * @param perfect Number of perfect puzzles
+     * @param winRate Win rate
+     * @param lossRate Loss rate
+     * @param currentStreak Current win streak
+     * @param maxStreak Maximum win streak
+     * @param histogram Mistake histogram
+     * @return Instance with success=true and error=null
+     * @throws IllegalArgumentException if puzzle/streak/rate parameters are negative
+     *         or if maxStreak is less than currentStreak
      */
     public static PlayerStatsResponse success(
         Integer solved,
@@ -132,12 +152,13 @@ public class PlayerStatsResponse {
         );
     }
 
+
     /**
-     * Crea una risposta di errore.
+     * Creates an error player stats response.
      * 
-     * @param errorMsg messaggio d'errore descrittivo
-     * @return istanza con success=false, error=errorMsg e restante null
-     * @throws IllegalArgumentException se errorMsg=null o vuoto
+     * @param errorMsg Descriptive error message
+     * @return Instance with success=false, error=errorMsg and remaining fields null
+     * @throws IllegalArgumentException if errorMsg is null or empty
      */
     public static PlayerStatsResponse error(String errorMsg) {
         if (errorMsg == null || errorMsg.trim().isEmpty()) {
@@ -159,17 +180,75 @@ public class PlayerStatsResponse {
         );
     }
 
-    // Getters
-    public boolean isSuccess() { return this.success; }
-    public String getError() { return this.error; }
+
+    /**
+     * Gets the number of solved puzzles.
+     *
+     * @return Number of solved puzzles or null if request failed
+     */
     public Integer getSolvedPuzzles() { return this.solved; }
+
+
+    /**
+     * Gets the number of failed puzzles.
+     *
+     * @return Number of failed puzzles or null if request failed
+     */
     public Integer getFailedPuzzles() { return this.failed; }
+
+
+    /**
+     * Gets the number of unfinished puzzles.
+     *
+     * @return Number of unfinished puzzles or null if request failed
+     */
     public Integer getUnfinishedPuzzles() { return this.unfinished; }
+
+
+    /**
+     * Gets the number of perfect puzzles (solved without errors).
+     *
+     * @return Number of perfect puzzles or null if request failed
+     */
     public Integer getPerfectPuzzles() { return this.perfect; }
+
+
+    /**
+     * Gets the win rate.
+     *
+     * @return Win rate or null if request failed
+     */
     public Float getWinRate() { return this.winRate; }
+
+
+    /**
+     * Gets the loss rate.
+     *
+     * @return Loss rate or null if request failed
+     */
     public Float getLossRate() { return this.lossRate; }
+
+
+    /**
+     * Gets the current win streak.
+     *
+     * @return Current win streak or null if request failed
+     */
     public Integer getCurrentStreak() { return this.currentStreak; }
+
+
+    /**
+     * Gets the maximum win streak.
+     *
+     * @return Maximum win streak or null if request failed
+     */
     public Integer getMaxStreak() { return this.maxStreak; }
-    // Non una copia, tanto è usa e getta
+
+
+    /**
+     * Gets the mistake histogram. Not a copy, as it's disposable.
+     *
+     * @return Mistake histogram or null if request failed
+     */
     public MistakeHistogram getHistogram() { return this.histogram; }
 }

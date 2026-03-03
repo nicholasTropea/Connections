@@ -1,11 +1,11 @@
 package com.nicholasTropea.game.net.responses;
 
-import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Response;
 
 /**
- * Risposta ad una richiesta di {@link RegisterRequest}.
+ * Response to a {@link RegisterRequest}.
  * 
- * JSON atteso:
+ * Expected JSON format:
  * <pre>{@code
  * {
  *    "success" : BOOLEAN,
@@ -13,40 +13,40 @@ import com.google.gson.annotations.SerializedName;
  * }
  * }</pre>
  * 
- * Errori possibili: "username già registrato"
+ * Possible errors: "username already registered"
  * 
- * @see LoginResponse per il formato di login
+ * @see LoginResponse for the login format
  */
-public class RegisterResponse {
-    /** true se registrazione avvenuta con successo, false altrimenti */
-    @SerializedName("success")
-    private final boolean success;
+public class RegisterResponse extends Response {
 
-    /** Messaggio d'errore (null se success=true) */
-    @SerializedName("error")
-    private final String error;
-
-    /** Costruttore privato */
-    private RegisterResponse( boolean success, String error) {
-        this.success = success;
-        this.error = error;
-    }
 
     /**
-     * Crea una risposta di successo per registrazione completata.
+     * Private constructor for creating register responses.
+     *
+     * @param success Whether the registration was successful
+     * @param error Error message if unsuccessful
+     */
+    private RegisterResponse( boolean success, String error) {
+        super("register", success, error);
+    }
+
+
+    /**
+     * Creates a successful registration response.
      * 
-     * @return istanza con success=true e error=null
+     * @return Instance with success=true and error=null
      */
     public static RegisterResponse success() {
         return new RegisterResponse(true, null);
     }
 
+
     /**
-     * Crea una risposta di errore per registrazione fallita.
+     * Creates an error registration response.
      * 
-     * @param errorMsg messaggio d'errore descrittivo
-     * @return istanza con success=false e error=errorMsg
-     * @throws IllegalArgumentException se errorMsg=null o vuoto
+     * @param errorMsg Descriptive error message
+     * @return Instance with success=false and error=errorMsg
+     * @throws IllegalArgumentException if errorMsg is null or empty
      */
     public static RegisterResponse error(String errorMsg) {
         if (errorMsg == null || errorMsg.trim().isEmpty()) {
@@ -55,8 +55,4 @@ public class RegisterResponse {
 
         return new RegisterResponse(false, errorMsg);
     }
-
-    // Getters
-    public boolean isSuccess() { return this.success; }
-    public String getError() { return this.error; }
 }

@@ -3,10 +3,12 @@ package com.nicholasTropea.game.net.responses;
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
+import com.nicholasTropea.game.net.Response;
+
 /**
- * Risposta ad una richiesta di {@link GameInfoRequest}.
+ * Response to a {@link GameInfoRequest}.
  * 
- * JSON atteso:
+ * Expected JSON format:
  * <pre>{@code
  * {
  *      "success" : BOOLEAN,
@@ -21,49 +23,54 @@ import java.util.List;
  * }
  * }</pre>
  * 
- * Errori possibili: "utente non loggato"
+ * Possible errors: "user not logged in"
  */
-public class GameInfoResponse {
-    /** true se richiesta avvenuta con successo, false altrimenti */
-    @SerializedName("success")
-    private final boolean success;
-
-    /** Messaggio d'errore (null se success=true) */
-    @SerializedName("error")
-    private final String error;
+public class GameInfoResponse extends Response {
 
     /**
-     *  Stato della partita
-     *  (true se partita in corso e non terminata, false altrimenti)
+     * Game state (true if game is active and not finished, false otherwise)
      */
     @SerializedName("active")
     private final boolean active;
 
-    /** Tempo rimanente della partita in millisecondi (null se active=false) */
+    /** Time remaining in the game in milliseconds (null if active=false) */
     @SerializedName("timeLeft")
     private final Long timeLeft;
 
-    /** Parole rimaste da raggruppare (null se active=false) */
+    /** Words remaining to be grouped (null if active=false) */
     @SerializedName("wordsLeft")
     private final List<String> wordsLeft;
 
-    /** Assegnazione corretta delle parole (null se active=true) */
+    /** Correct solution for word groups (null if active=true) */
     @SerializedName("solution")
     private final List<List<String>> solution;
 
-    /** Lista di gruppi di parole indovinate */
+    /** List of guessed word groups */
     @SerializedName("guessedGroups")
     private final List<List<String>> guessedGroups;
 
-    /** Numero di errori commessi nella partita */
+    /** Number of errors made in the game */
     @SerializedName("errors")
     private final Integer errors;
 
-    /** Punteggio ottenuto nella partita */
+    /** Score obtained in the game */
     @SerializedName("score")
     private final Integer score;
 
-    /** Costruttore privato */
+
+    /**
+     * Private constructor for creating game info responses.
+     *
+     * @param success Whether the request was successful
+     * @param error Error message if unsuccessful
+     * @param active Whether the game is active
+     * @param timeLeft Time remaining in milliseconds
+     * @param wordsLeft List of words left to group
+     * @param solution Correct solution for word groups
+     * @param guessedGroups List of guessed groups
+     * @param errors Number of errors made
+     * @param score Score obtained
+     */
     private GameInfoResponse(
         boolean success,
         String error,
@@ -75,8 +82,7 @@ public class GameInfoResponse {
         Integer errors,
         Integer score
     ) {
-        this.success = success;
-        this.error = error;
+        super("requestGameInfo", success, error);
         this.active = active;
         this.timeLeft = timeLeft;
         this.wordsLeft = wordsLeft != null ? List.copyOf(wordsLeft) : null;
@@ -86,21 +92,21 @@ public class GameInfoResponse {
         this.score = score;
     }
 
+
     /**
-     * Crea una risposta di successo.
-     * Se active == true: timeLeft e wordsLeft != null, solution == null
-     * Se active == false: solution != null, timeLeft e wordsLeft == null
+     * Creates a successful game info response.
+     * If active == true: timeLeft and wordsLeft != null, solution == null
+     * If active == false: solution != null, timeLeft and wordsLeft == null
      * 
-     * @param active true se partita corrente e non terminata dal giocatore,
-     * false altrimenti
-     * @param timeLeft tempo rimanente della partita in millisecondi
-     * @param wordsLeft parole rimaste da raggruppare
-     * @param solution assegnazione corretta delle parole
-     * @param guessedGroups lista di gruppi di parole indovinate
-     * @param errors numero di errori commessi
-     * @param score punteggio ottenuto
-     * 
-     * @return istanza con success=true e error=null
+     * @param active True if game is current and not finished by player, false otherwise
+     * @param timeLeft Time remaining in the game in milliseconds
+     * @param wordsLeft Words remaining to be grouped
+     * @param solution Correct solution for word groups
+     * @param guessedGroups List of guessed word groups
+     * @param errors Number of errors made
+     * @param score Score obtained
+     * @return Instance with success=true and error=null
+     * @throws IllegalArgumentException if errors or score is null
      */
     public static GameInfoResponse success(
         boolean active,
@@ -142,12 +148,13 @@ public class GameInfoResponse {
         );
     }
 
+
     /**
-     * Crea una risposta di errore.
+     * Creates an error game info response.
      * 
-     * @param errorMsg messaggio d'errore descrittivo
-     * @return istanza con success=false, error=errorMsg e restante=null
-     * @throws IllegalArgumentException se errorMsg=null o vuoto
+     * @param errorMsg Descriptive error message
+     * @return Instance with success=false, error=errorMsg and remaining fields null
+     * @throws IllegalArgumentException if errorMsg is null or empty
      */
     public static GameInfoResponse error(String errorMsg) {
         if (errorMsg == null || errorMsg.trim().isEmpty()) {
@@ -167,14 +174,59 @@ public class GameInfoResponse {
         );
     }
 
-    // Getters
-    public boolean isSuccess() { return this.success; }
-    public String getError() { return this.error; }
+
+    /**
+     * Checks if the game is active.
+     *
+     * @return True if game is active, false otherwise
+     */
     public boolean isActive() { return this.active; }
+
+
+    /**
+     * Gets the time remaining in the game.
+     *
+     * @return Time remaining in milliseconds or null if game is not active
+     */
     public Long getTimeLeft() { return this.timeLeft; }
+
+
+    /**
+     * Gets the words left to be grouped.
+     *
+     * @return Defensive copy of words left list or null if game is not active
+     */
     public List<String> getWordsLeft() { return this.wordsLeft; }
+
+
+    /**
+     * Gets the correct solution for word groups.
+     *
+     * @return Defensive copy of solution list or null if game is active
+     */
     public List<List<String>> getSolution() { return this.solution; }
+
+
+    /**
+     * Gets the list of guessed word groups.
+     *
+     * @return Defensive copy of guessed groups list or null if request failed
+     */
     public List<List<String>> getGuessedGroups() { return this.guessedGroups; }
+
+
+    /**
+     * Gets the number of errors made.
+     *
+     * @return Number of errors or null if request failed
+     */
     public Integer getErrors() { return this.errors; }
+
+
+    /**
+     * Gets the score obtained.
+     *
+     * @return Score or null if request failed
+     */
     public Integer getScore() { return this.score; }
 }

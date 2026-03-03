@@ -3,10 +3,12 @@ package com.nicholasTropea.game.net.responses;
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
+import com.nicholasTropea.game.net.Response;
+
 /**
- * Risposta ad una richiesta di {@link LoginRequest}.
+ * Response to a {@link LoginRequest}.
  * 
- * JSON atteso:
+ * Expected JSON format:
  * <pre>{@code
  * {
  *    "success" : BOOLEAN,
@@ -20,44 +22,49 @@ import java.util.List;
  * }
  * }</pre>
  * 
- * Errori possibili: "nome inesistente", "psw incorretta", "connessione già loggata"
+ * Possible errors: "username not found", "incorrect password", "connection already logged in"
  * 
- * @see RegisterResponse per il formato di registrazione
+ * @see RegisterResponse for the registration format
  */
-public class LoginResponse {
-    /** true se login avvenuto con successo, false altrimenti */
-    @SerializedName("success")
-    private final boolean success;
+public class LoginResponse extends Response {
 
-    /** Messaggio d'errore (null se success=true) */
-    @SerializedName("error")
-    private final String error;
-
-    /** Id della partita corrente (null se success=false) */
+    /** ID of the current game (null if success=false) */
     @SerializedName("gameId")
     private final Integer gameId;
 
-    /** Lista di parole della partita corrente (null se success=false) */
+    /** List of words in the current game (null if success=false) */
     @SerializedName("words")
     private final List<String> words;
 
-    /** Lista di gruppi di parole già indovinate della partita corrente */
+    /** List of already guessed word groups in the current game */
     @SerializedName("guessedGroups")
     private final List<List<String>> guessedGroups;
 
-    /** Tempo rimanente della partita corrente in millisecondi */
+    /** Time remaining in the current game in milliseconds */
     @SerializedName("timeLeft")
     private final Long timeLeft;
 
-    /** Numero di errori già commessi nella partita corrente*/
+    /** Number of errors already made in the current game */
     @SerializedName("errors")
     private final Integer errors;
 
-    /** Punteggio ottenuto nella partita corrente */
+    /** Score obtained in the current game */
     @SerializedName("score")
     private final Integer score;
 
-    /** Costruttore privato */
+
+    /**
+     * Private constructor for creating login responses.
+     *
+     * @param success Whether the login was successful
+     * @param error Error message if unsuccessful
+     * @param gameId ID of the current game
+     * @param words List of words in the game
+     * @param guessedGroups List of already guessed groups
+     * @param timeLeft Time remaining in milliseconds
+     * @param errors Number of errors made
+     * @param score Score obtained
+     */
     private LoginResponse(
         boolean success,
         String error,
@@ -68,8 +75,7 @@ public class LoginResponse {
         Integer errors,
         Integer  score
     ) {
-        this.success = success;
-        this.error = error;
+        super("login", success, error);
         this.gameId = gameId;
         this.words = words != null ? List.copyOf(words) : null;
         this.guessedGroups = guessedGroups != null ? List.copyOf(guessedGroups) : null;
@@ -78,18 +84,18 @@ public class LoginResponse {
         this.score = score;
     }
 
+
     /**
-     * Crea una risposta di successo per login completato.
+     * Creates a successful login response.
      * 
-     * @param gameId id della partita corrente
-     * @param words lista di parole della partita corrente
-     * @param guessedGroups lista di gruppi di parole già indovinate
-     *                      della partita corrente
-     * @param timeLeft tempo rimanente della partita corrente in millisecondi
-     * @param errors numero di errori già commessi nella partita corrente
-     * @param score punteggio ottenuto nella partita corrente
-     * 
-     * @return istanza con success=true e error=null
+     * @param gameId ID of the current game
+     * @param words List of words in the current game
+     * @param guessedGroups List of already guessed word groups in the current game
+     * @param timeLeft Time remaining in the current game in milliseconds
+     * @param errors Number of errors already made in the current game
+     * @param score Score obtained in the current game
+     * @return Instance with success=true and error=null
+     * @throws IllegalArgumentException if gameId is out of range or words doesn't contain 16 elements
      */
     public static LoginResponse success(
         Integer gameId,
@@ -99,7 +105,6 @@ public class LoginResponse {
         Integer errors,
         Integer score
     ) {
-        // Check leggero
         validateSuccess(gameId, words);
 
         return new LoginResponse(
@@ -114,12 +119,13 @@ public class LoginResponse {
         );
     }
 
+
     /**
-     * Crea una risposta di errore per login fallito.
+     * Creates an error login response.
      * 
-     * @param errorMsg messaggio d'errore descrittivo
-     * @return istanza con success=false, error=errorMsg e restante=null
-     * @throws IllegalArgumentException se errorMsg=null o vuoto
+     * @param errorMsg Descriptive error message
+     * @return Instance with success=false, error=errorMsg and remaining fields null
+     * @throws IllegalArgumentException if errorMsg is null or empty
      */
     public static LoginResponse error(String errorMsg) {
         if (errorMsg == null || errorMsg.trim().isEmpty()) {
@@ -129,12 +135,13 @@ public class LoginResponse {
         return new LoginResponse(false, errorMsg, null, null, null, null, null, null);
     }
 
+
     /**
-     * Helper function per validazione veloce degli argomenti passati a success()
+     * Helper function for quick validation of arguments passed to success().
      * 
-     * @param gameId id della partita corrente
-     * @param words lista di parole della partita corrente
-     * @throws IllegalArgumentException se gameId o words sono malformati
+     * @param gameId ID of the current game
+     * @param words List of words in the current game
+     * @throws IllegalArgumentException if gameId or words are malformed
      */
     private static void validateSuccess(Integer gameId, List<String> words) {
         final int MIN_ID = 0;
@@ -148,13 +155,51 @@ public class LoginResponse {
         }
     }
 
-    // Getters
-    public boolean isSuccess() { return this.success; }
-    public String getError() { return this.error; }
+
+    /**
+     * Gets the game ID.
+     *
+     * @return Game ID or null if login failed
+     */
     public Integer getGameId() { return this.gameId; }
+
+
+    /**
+     * Gets the list of words in the game.
+     *
+     * @return Defensive copy of words list or null if login failed
+     */
     public List<String> getWords() { return this.words; }
+
+
+    /**
+     * Gets the list of already guessed groups.
+     *
+     * @return Defensive copy of guessed groups list or null
+     */
     public List<List<String>> getGuessedGroups() { return this.guessedGroups; }
+
+
+    /**
+     * Gets the time remaining in the game.
+     *
+     * @return Time remaining in milliseconds or null if login failed
+     */
     public Long getTimeLeft() { return this.timeLeft; }
+
+
+    /**
+     * Gets the number of errors made.
+     *
+     * @return Number of errors or null if login failed
+     */
     public Integer getErrors() { return this.errors; }
+
+
+    /**
+     * Gets the score obtained.
+     *
+     * @return Score or null if login failed
+     */
     public Integer getScore() { return this.score; }
 }

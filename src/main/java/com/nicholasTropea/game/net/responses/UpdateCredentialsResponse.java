@@ -1,11 +1,11 @@
 package com.nicholasTropea.game.net.responses;
 
-import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Response;
 
 /**
- * Risposta ad una richiesta di {@link UpdateCredentialsRequest}.
+ * Response to an {@link UpdateCredentialsRequest}.
  * 
- * JSON atteso:
+ * Expected JSON format:
  * <pre>{@code
  * {
  *      "success" : BOOLEAN,
@@ -13,38 +13,38 @@ import com.google.gson.annotations.SerializedName;
  * }
  * }</pre>
  * 
- * Errori possibili: "oldPsw non valida", "utente inesistente", "newName già registrato"
+ * Possible errors: "oldPsw not valid", "user not found", "newName already registered"
  */
-public class UpdateCredentialsResponse {
-    /** true se richiesta avvenuta con successo, false altrimenti */
-    @SerializedName("success")
-    private final boolean success;
-        
-    /** Messaggio d'errore (null se success=true) */
-    @SerializedName("error")
-    private final String error;
-    
-    /** Costruttore */
-    private UpdateCredentialsResponse(boolean success, String error) {
-        this.success = success;
-        this.error = error;
-    }
+public class UpdateCredentialsResponse extends Response {
+
 
     /**
-     * Crea una risposta di successo.
+     * Private constructor for creating update credentials responses.
+     *
+     * @param success Whether the update was successful
+     * @param error Error message if unsuccessful
+     */
+    private UpdateCredentialsResponse(boolean success, String error) {
+        super("updateCredentials", success, error);
+    }
+
+
+    /**
+     * Creates a successful update credentials response.
      * 
-     * @return istanza con success=true e error=null
+     * @return Instance with success=true and error=null
      */
     public static UpdateCredentialsResponse success() {
         return new UpdateCredentialsResponse(true, null);
     }
 
+
     /**
-     * Crea una risposta di errore.
+     * Creates an error update credentials response.
      * 
-     * @param errorMsg messaggio d'errore descrittivo
-     * @return istanza con success=false, error=errorMsg
-     * @throws IllegalArgumentException se errorMsg=null o vuoto
+     * @param errorMsg Descriptive error message
+     * @return Instance with success=false and error=errorMsg
+     * @throws IllegalArgumentException if errorMsg is null or empty
      */
     public static UpdateCredentialsResponse error(String errorMsg) {
         if (errorMsg == null || errorMsg.trim().isEmpty()) {
@@ -53,8 +53,4 @@ public class UpdateCredentialsResponse {
 
         return new UpdateCredentialsResponse(false, errorMsg);
     }
-
-    // Getters
-    public boolean isSuccess() { return this.success; }
-    public String getError() { return this.error; }
 }

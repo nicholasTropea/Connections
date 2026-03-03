@@ -4,11 +4,12 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 import com.nicholasTropea.game.model.LeaderboardRecord;
+import com.nicholasTropea.game.net.Response;
 
 /**
- * Risposta ad una richiesta di {@link LeaderboardRequest}.
+ * Response to a {@link LeaderboardRequest}.
  * 
- * JSON atteso:
+ * Expected JSON format:
  * <pre>{@code
  * {
  *      "success" : BOOLEAN,
@@ -17,38 +18,38 @@ import com.nicholasTropea.game.model.LeaderboardRecord;
  * }
  * }</pre>
  * 
- * Errori possibili: "username non registrato", "utente non loggato"
+ * Possible errors: "username not registered", "user not logged in"
  */
-public class LeaderboardResponse {
-    /** true se richiesta avvenuta con successo, false altrimenti */
-    @SerializedName("success")
-    private final boolean success;
+public class LeaderboardResponse extends Response {
 
-    /** Messaggio d'errore (null se success=true) */
-    @SerializedName("error")
-    private final String error;
-
-    /** Lista ordinata contenente i giocatori richiesti */
+    /** Sorted list containing the requested players */
     @SerializedName("records")
     private final List<LeaderboardRecord> records;
 
-    /** Costruttore privato */
+
+    /**
+     * Private constructor for creating leaderboard responses.
+     *
+     * @param success Whether the request was successful
+     * @param error Error message if unsuccessful
+     * @param records List of leaderboard records
+     */
     private LeaderboardResponse(
         boolean success,
         String error,
         List<LeaderboardRecord> records
     ) {
-        this.success = success;
-        this.error = error;
+        super("requestLeaderboard", success, error);
         this.records = records;
     }
 
+
     /**
-     * Crea una risposta di successo.
+     * Creates a successful leaderboard response.
      * 
-     * @param records record dei giocatori richiesti
-     * 
-     * @return istanza con success=true e error=null
+     * @param records Records of the requested players
+     * @return Instance with success=true and error=null
+     * @throws IllegalArgumentException if records is null
      */
     public static LeaderboardResponse success(List<LeaderboardRecord> records) {
         if (records == null) {
@@ -61,12 +62,13 @@ public class LeaderboardResponse {
         return new LeaderboardResponse(true, null, records);
     }
 
+
     /**
-     * Crea una risposta di errore.
+     * Creates an error leaderboard response.
      * 
-     * @param errorMsg messaggio d'errore descrittivo
-     * @return istanza con success=false, error=errorMsg e restante=null
-     * @throws IllegalArgumentException se errorMsg=null o vuoto
+     * @param errorMsg Descriptive error message
+     * @return Instance with success=false, error=errorMsg and remaining fields null
+     * @throws IllegalArgumentException if errorMsg is null or empty
      */
     public static LeaderboardResponse error(String errorMsg) {
         if (errorMsg == null || errorMsg.trim().isEmpty()) {
@@ -76,8 +78,11 @@ public class LeaderboardResponse {
         return new LeaderboardResponse(false, errorMsg, null);
     }
 
-    // Getters
-    public boolean isSuccess() { return this.success; }
-    public String getError() { return this.error; }
+
+    /**
+     * Gets the leaderboard records.
+     *
+     * @return List of leaderboard records or null if request failed
+     */
     public List<LeaderboardRecord> getRecords() { return this.records; }
 }

@@ -1,11 +1,11 @@
 package com.nicholasTropea.game.net.responses;
 
-import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Response;
 
 /**
- * Risposta ad una richiesta di {@link LogoutRequest}.
+ * Response to a {@link LogoutRequest}.
  * 
- * JSON atteso:
+ * Expected JSON format:
  * <pre>{@code
  * {
  *      "success" : BOOLEAN,
@@ -13,38 +13,38 @@ import com.google.gson.annotations.SerializedName;
  * }
  * }</pre>
  * 
- * Errori possibili: "utente non loggato"
+ * Possible errors: "user not logged in"
  */
-public class LogoutResponse {
-    /** true se richiesta avvenuta con successo, false altrimenti */
-    @SerializedName("success")
-    private final boolean success;
+public class LogoutResponse extends Response {
 
-    /** Messaggio d'errore (null se success=true) */
-    @SerializedName("error")
-    private final String error;
-
-    /** Costruttore privato */
-    private LogoutResponse(boolean success, String error) {
-        this.success = success;
-        this.error = error;
-    }
 
     /**
-     * Crea una risposta di successo.
+     * Private constructor for creating logout responses.
+     *
+     * @param success Whether the logout was successful
+     * @param error Error message if unsuccessful
+     */
+    private LogoutResponse(boolean success, String error) {
+        super("logout", success, error);
+    }
+
+
+    /**
+     * Creates a successful logout response.
      * 
-     * @return istanza con success=true e error=null
+     * @return Instance with success=true and error=null
      */
     public static LogoutResponse success() {
         return new LogoutResponse(true, null);
     }
 
+
     /**
-     * Crea una risposta di errore.
+     * Creates an error logout response.
      * 
-     * @param errorMsg messaggio d'errore descrittivo
-     * @return istanza con success=false, error=errorMsg
-     * @throws IllegalArgumentException se errorMsg=null o vuoto
+     * @param errorMsg Descriptive error message
+     * @return Instance with success=false and error=errorMsg
+     * @throws IllegalArgumentException if errorMsg is null or empty
      */
     public static LogoutResponse error(String errorMsg) {
         if (errorMsg == null || errorMsg.trim().isEmpty()) {
@@ -53,8 +53,4 @@ public class LogoutResponse {
 
         return new LogoutResponse(false, errorMsg);
     }
-
-    // Getters
-    public boolean isSuccess() { return this.success; }
-    public String getError() { return this.error; }
 }

@@ -1,11 +1,12 @@
 package com.nicholasTropea.game.net.responses;
 
 import com.google.gson.annotations.SerializedName;
+import com.nicholasTropea.game.net.Response;
 
 /**
- * Risposta ad una richiesta di {@link GameStatsRequest}.
+ * Response to a {@link GameStatsRequest}.
  * 
- * JSON atteso:
+ * Expected JSON format:
  * <pre>{@code
  * {
  *      "success" : BOOLEAN,
@@ -20,46 +21,52 @@ import com.google.gson.annotations.SerializedName;
  * }
  * }</pre>
  * 
- * Errori possibili: "id inesistente", "utente non loggato"
+ * Possible errors: "id not found", "user not logged in"
  */
-public class GameStatsResponse {
-    /** true se richiesta avvenuta con successo, false altrimenti */
-    @SerializedName("success")
-    private final boolean success;
+public class GameStatsResponse extends Response {
 
-    /** Messaggio d'errore (null se success=true) */
-    @SerializedName("error")
-    private final String error;
-
-    /** Stato della partita (true se partita in corso, false altrimenti) */
+    /** Game state (true if game is active, false otherwise) */
     @SerializedName("active")
     private final boolean active;
 
-    /** Tempo rimanente della partita in millisecondi (null se active=false) */
+    /** Time remaining in the game in milliseconds (null if active=false) */
     @SerializedName("timeLeft")
     private final Long timeLeft;
 
-    /** Numero di giocatori con la partita ancora in corso (null se active=false) */
+    /** Number of players with the game still in progress (null if active=false) */
     @SerializedName("activePlayers")
     private final Integer activePlayers;
 
-    /** Numero di giocatori che hanno concluso la partita */
+    /** Number of players who finished the game */
     @SerializedName("finishedPlayers")
     private final Integer finishedPlayers;
 
-    /** Numero di giocatori che hanno concluso la partita con una vittoria */
+    /** Number of players who finished the game with a win */
     @SerializedName("wonPlayers")
     private final Integer wonPlayers;
 
-    /** Numero di giocatori che hanno partecipato alla partita (null se active=true) */
+    /** Number of players who participated in the game (null if active=true) */
     @SerializedName("totalPlayers")
     private final Integer totalPlayers;
 
-    /** Punteggio medio ottenuto dai giocatori (null se active=true) */
+    /** Average score obtained by players (null if active=true) */
     @SerializedName("averageScore")
     private final Float averageScore;
 
-    /** Costruttore privato */
+
+    /**
+     * Private constructor for creating game stats responses.
+     *
+     * @param success Whether the request was successful
+     * @param error Error message if unsuccessful
+     * @param active Whether the game is active
+     * @param timeLeft Time remaining in milliseconds
+     * @param activePlayers Number of active players
+     * @param finishedPlayers Number of finished players
+     * @param wonPlayers Number of players who won
+     * @param totalPlayers Total number of players
+     * @param averageScore Average score
+     */
     private GameStatsResponse(
         boolean success,
         String error,
@@ -71,8 +78,7 @@ public class GameStatsResponse {
         Integer totalPlayers,
         Float averageScore
     ) {
-        this.success = success;
-        this.error = error;
+        super("requestGameStats", success, error);
         this.active = active;
         this.timeLeft = timeLeft;
         this.activePlayers = activePlayers;
@@ -82,25 +88,23 @@ public class GameStatsResponse {
         this.averageScore = averageScore;
     }
 
+
     /**
-     * Crea una risposta di successo.
-     * Se active == true:
-     *      timeLeft e activePlayers != null,
-     *      averageScore e totalPlayers == null
-     * Se active == false:
-     *      averageScore e totalPlayers != null,
-     *      timeLeft e activePlayers == null
+     * Creates a successful game stats response.
+     * If active == true: timeLeft and activePlayers != null,
+     *                    averageScore and totalPlayers == null
+     * If active == false: averageScore and totalPlayers != null,
+     *                     timeLeft and activePlayers == null
      * 
-     * @param active true se la partita non è terminata, false altrimenti
-     * @param timeLeft tempo rimanente della partita in millisecondi
-     * @param activePlayers numero di giocatori con la partita ancora in corso
-     * @param finishedPlayers numero di giocatori che hanno concluso la partita
-     * @param wonPlayers numero di giocatori che hanno
-     *                   concluso la partita con una vittoria
-     * @param totalPlayers numero di giocatori che hanno partecipato alla partita
-     * @param averageScore punteggio medio ottenuto dai giocatori
-     * 
-     * @return istanza con success=true e error=null
+     * @param active True if the game is not finished, false otherwise
+     * @param timeLeft Time remaining in the game in milliseconds
+     * @param activePlayers Number of players with the game still in progress
+     * @param finishedPlayers Number of players who finished the game
+     * @param wonPlayers Number of players who finished the game with a win
+     * @param totalPlayers Number of players who participated in the game
+     * @param averageScore Average score obtained by players
+     * @return Instance with success=true and error=null
+     * @throws IllegalArgumentException if finishedPlayers or wonPlayers is null
      */
     public static GameStatsResponse success(
         boolean active,
@@ -144,12 +148,13 @@ public class GameStatsResponse {
         );
     }
 
+
     /**
-     * Crea una risposta di errore.
+     * Creates an error game stats response.
      * 
-     * @param errorMsg messaggio d'errore descrittivo
-     * @return istanza con success=false, error=errorMsg e restante=null
-     * @throws IllegalArgumentException se errorMsg=null o vuoto
+     * @param errorMsg Descriptive error message
+     * @return Instance with success=false, error=errorMsg and remaining fields null
+     * @throws IllegalArgumentException if errorMsg is null or empty
      */
     public static GameStatsResponse error(String errorMsg) {
         if (errorMsg == null || errorMsg.trim().isEmpty()) {
@@ -169,14 +174,59 @@ public class GameStatsResponse {
         );
     }
 
-    // Getters
-    public boolean isSuccess() { return this.success; }
-    public String getError() { return this.error; }
+
+    /**
+     * Checks if the game is active.
+     *
+     * @return True if game is active, false otherwise
+     */
     public boolean isActive() { return this.active; }
+
+
+    /**
+     * Gets the time remaining in the game.
+     *
+     * @return Time remaining in milliseconds or null if game is not active
+     */
     public Long getTimeLeft() { return this.timeLeft; }
+
+
+    /**
+     * Gets the number of active players.
+     *
+     * @return Number of active players or null if game is not active
+     */
     public Integer getActivePlayers() { return this.activePlayers; }
+
+
+    /**
+     * Gets the number of players who finished the game.
+     *
+     * @return Number of finished players or null if request failed
+     */
     public Integer getFinishedPlayers() { return this.finishedPlayers; }
+
+
+    /**
+     * Gets the number of players who won.
+     *
+     * @return Number of players who won or null if request failed
+     */
     public Integer getWonPlayers() { return this.wonPlayers; }
+
+
+    /**
+     * Gets the total number of players who participated.
+     *
+     * @return Total number of players or null if game is active
+     */
     public Integer getTotalPlayers() { return this.totalPlayers; }
+
+
+    /**
+     * Gets the average score.
+     *
+     * @return Average score or null if game is active
+     */
     public Float getAverageScore() { return this.averageScore; }
 }
