@@ -1,27 +1,39 @@
 package com.nicholasTropea.game.model;
 
 /**
- * Rappresenta la posizione in classifica di un utente.
+ * Represents a player's position in the leaderboard.
  * 
- * Restituita da una {@link LeaderboardResponse}.
+ * Returned by a {@link LeaderboardResponse}.
  */
 public class LeaderboardRecord {
-    /** Username dell'utente */
+    /** Player username. */
     private final String username;
 
-    /** Posizione in classifica dell'utente */
+    /** Player position in the leaderboard. */
     private final int position;
     
-    /** Costruttore */
+    /**
+     * Creates a leaderboard record.
+     *
+     * @param username player username
+     * @param position leaderboard position
+     * @throws IllegalArgumentException if username is empty/null or position is less than 1
+     */
     public LeaderboardRecord(String username, int position) {
-        if (username.trim().isEmpty() || username == null) throw new IllegalArgumentException("username cannot be empty or null");
-        if (position < 1) throw new IllegalArgumentException("position cannot be less than 1");
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("username cannot be empty or null");
+        }
+        if (position < 1) {
+            throw new IllegalArgumentException("position cannot be less than 1");
+        }
 
         this.username = username;
         this.position = position;
     }
 
-    // Getters
+    /** Gets the player username. */
     public String getUsername() { return this.username; }
+
+    /** Gets the player position. */
     public int getPosition() { return this.position; }
 }

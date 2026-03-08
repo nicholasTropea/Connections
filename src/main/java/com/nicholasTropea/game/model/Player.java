@@ -6,6 +6,9 @@ import java.util.Objects;
 
 /** Represents a registered player. */
 public class Player {
+    /** Unique player identifier. */
+    private final int userId;
+
     /** Unique player nickname. */
     private String nickname;
 
@@ -44,12 +47,14 @@ public class Player {
     /**
      * Creates a new player instance.
      *
+     * @param userId unique player identifier
      * @param nickname player nickname
      * @param password player password
      * @throws NullPointerException if nickname or password is null
      * @throws IllegalArgumentException if nickname or password is blank
      */
-    public Player(String nickname, String password) {
+    public Player(int userId, String nickname, String password) {
+        this.userId = userId;
         this.nickname = requireNotBlank(nickname, "nickname");
         this.password = requireNotBlank(password, "password");
         this.globalScore = 0;
@@ -60,6 +65,9 @@ public class Player {
         this.resultCounts = new HashMap<>();
     }
 
+
+    /** Return the player's user ID */
+    public int getUserId() { return this.userId; }
 
     /** Return the player's nickname */
     public String getNickname() { return this.nickname; }

@@ -8,8 +8,8 @@ import java.util.Objects;
  * Represents the state of a player for a specific game.
  */
 public class PlayerGameState {
-    /** Player nickname this state belongs to. */
-    private final String playerNickname;
+    /** Player user ID this state belongs to. */
+    private final int userId;
 
     /** Game identifier this state refers to. */
     private final int gameId;
@@ -40,18 +40,21 @@ public class PlayerGameState {
     /**
      * Creates a new state object for a player's game session.
      *
-     * @param playerNickname unique player nickname
+     * @param userId unique player identifier
      * @param gameId game identifier
      * @param initialWords words initially available in the game
-     * @throws NullPointerException if playerNickname or initialWords is null
-     * @throws IllegalArgumentException if playerNickname is blank or gameId is negative
+     * @throws NullPointerException if initialWords is null
+     * @throws IllegalArgumentException if userId is negative or gameId is out of range
      */
-    public PlayerGameState(String playerNickname, int gameId, List<String> initialWords) {
-        this.playerNickname = requireNotBlank(playerNickname, "playerNickname");
+    public PlayerGameState(int userId, int gameId, List<String> initialWords) {
+        if (userId < 0) {
+            throw new IllegalArgumentException("userId must be non-negative");
+        }
         if (gameId < 0 || gameId > 911) {
             throw new IllegalArgumentException("gameId must be between 0 and 911");
         }
 
+        this.userId = userId;
         this.gameId = gameId;
         this.correctProposals = 0;
         this.remainingWords = new ArrayList<>(Objects.requireNonNull(initialWords));
@@ -62,11 +65,11 @@ public class PlayerGameState {
 
 
     /**
-     * Gets the player nickname.
+     * Gets the player user ID.
      *
-     * @return player nickname
+     * @return player user ID
      */
-    public String getPlayerNickname() { return this.playerNickname; }
+    public int getUserId() { return this.userId; }
 
 
     /**
@@ -188,21 +191,5 @@ public class PlayerGameState {
      */
     public void setRemainingWords(List<String> remainingWords) {
         this.remainingWords = new ArrayList<>(Objects.requireNonNull(remainingWords));
-    }
-
-
-    /**
-     * Ensures a string is not null and not blank.
-     *
-     * @param value string to validate
-     * @param fieldName field name for error messages
-     * @return validated string
-     */
-    private static String requireNotBlank(String value, String fieldName) {
-        String notNullValue = Objects.requireNonNull(value, fieldName + " cannot be null");
-        if (notNullValue.trim().isEmpty()) {
-            throw new IllegalArgumentException(fieldName + " cannot be blank");
-        }
-        return notNullValue;
     }
 }

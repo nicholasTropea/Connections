@@ -1,7 +1,5 @@
 package com.nicholasTropea.game.server;
 
-import com.nicholasTropea.game.server.ClientHandler;
-
 import java.net.ServerSocket;
 import java.net.Socket;
 
