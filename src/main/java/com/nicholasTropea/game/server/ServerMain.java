@@ -1,26 +1,34 @@
 package com.nicholasTropea.game.server;
 
-import com.nicholasTropea.game.server.NetworkManager;
-
 /**
- * Punto di ingresso principale del server del gioco.
+ * Main entry point for the game server.
  * 
- * Avvia il {@link NetworkManager} in un thread separato per gestire
- * le connessioni dei client in parallelo al thread principale.
+ * Starts the {@link NetworkManager} in a separate thread to handle
+ * client connections in parallel to the main thread.
  * 
  * @author Nicholas Riccardo Tropea
  */
 public class ServerMain {
-    /** Porta di ascolto del server per le connessioni TCP. */
+    /** Server listening port for TCP connections. */
     private static final int SERVER_PORT = 5555;
 
+
     /**
-     * Avvia il server creando e lanciando il NetworkManager.
+     * Starts the server by creating and launching the NetworkManager.
      * 
-     * @param args Argomenti della riga di comando (non utilizzati)
+     * @param args Command line arguments (not used)
      */
     public static void main(String[] args) {
+        System.out.println("=".repeat(60));
+        System.out.println("CONNECTIONS GAME SERVER");
+        System.out.println("=".repeat(60));
+        System.out.println("Starting server on port " + SERVER_PORT + "...");
+        
         NetworkManager netManager = new NetworkManager(ServerMain.SERVER_PORT);
         new Thread(netManager).start();
+        
+        System.out.println("Server started successfully!");
+        System.out.println("Waiting for client connections...");
+        System.out.println("=".repeat(60));
     }
 }
