@@ -17,6 +17,7 @@ import com.nicholasTropea.game.net.Request;
  *    "operation": "login",
  *    "username": "STRING",
  *    "psw": "STRING"
+ *    "udpPort": INT
  * }
  * }</pre>
  * 
@@ -35,6 +36,12 @@ public class LoginRequest extends Request {
     @SerializedName("psw")
     private final String password;
 
+    /**
+     * Optional UDP port used by the client to receive async notifications.
+     */
+    @SerializedName("udpPort")
+    private final Integer udpPort;
+
 
     /**
      * Constructs a login request with the provided credentials.
@@ -46,6 +53,18 @@ public class LoginRequest extends Request {
      * @throws IllegalArgumentException if username is empty or password is too short
      */
     public LoginRequest(String username, String password) {
+        this(username, password, null);
+    }
+
+
+    /**
+     * Constructs a login request with credentials and optional UDP port.
+     *
+     * @param username account username
+     * @param password account password
+     * @param udpPort UDP port for asynchronous notifications, optional
+     */
+    public LoginRequest(String username, String password, Integer udpPort) {
         super("login");
 
         this.username = Objects.requireNonNull(username, "Username is required").trim();
@@ -57,6 +76,12 @@ public class LoginRequest extends Request {
         if (this.password.length() < 6) {
             throw new IllegalArgumentException("Password must be at least 6 characters");
         }
+
+        if (udpPort != null && (udpPort < 1 || udpPort > 65535)) {
+            throw new IllegalArgumentException("udpPort must be between 1 and 65535");
+        }
+
+        this.udpPort = udpPort;
     }
 
 
@@ -115,4 +140,12 @@ public class LoginRequest extends Request {
      * @return The password
      */
     public String getPassword() { return this.password; }
+
+
+    /**
+     * Gets the optional UDP port used for async notifications.
+     *
+     * @return UDP port or null if not provided
+     */
+    public Integer getUdpPort() { return this.udpPort; }
 }
