@@ -68,43 +68,23 @@ public class PlayerGameState {
     }
 
 
-    /**
-     * Gets the player user ID.
-     *
-     * @return player user ID
-     */
+    /** @return player user ID */
     public int getUserId() { return this.userId; }
 
 
-    /**
-     * Gets the game identifier.
-     *
-     * @return game id
-     */
+    /** @return game id */
     public int getGameId() { return this.gameId; }
 
 
-    /**
-     * Gets the number of correct proposals.
-     *
-     * @return number of correct proposals
-     */
+    /** @return number of correct proposals */
     public int getCorrectProposals() { return this.correctProposals; }
 
 
-    /**
-     * Gets the list of remaining words.
-     *
-     * @return immutable copy of remaining words
-     */
+    /** @return immutable copy of remaining words */
     public List<String> getRemainingWords() { return List.copyOf(this.remainingWords); }
 
 
-    /**
-     * Gets correctly guessed groups.
-     *
-     * @return immutable deep copy of guessed groups
-     */
+    /** @return immutable deep copy of guessed groups */
     public List<List<String>> getGuessedGroups() {
         List<List<String>> copy = new ArrayList<>();
         for (List<String> group : this.guessedGroups) {
@@ -114,44 +94,24 @@ public class PlayerGameState {
     }
 
 
-    /**
-     * Gets the number of errors made.
-     *
-     * @return error count
-     */
+    /** @return error count */
     public int getErrorCount() { return this.errorCount; }
 
 
-    /**
-     * Gets the current score.
-     *
-     * @return game score
-     */
+    /** @return game score */
     public int getScore() { return this.score; }
 
 
-    /**
-     * Gets the final game state.
-     *
-     * @return final state
-     */
+    /** @return final state */
     public GameResult getFinalState() { return this.finalState; }
 
 
-    /**
-     * Increments the number of correct proposals by one.
-     */
-    public void incrementCorrectProposals() {
-        this.correctProposals++;
-    }
+    /** Increments the number of correct proposals by one. */
+    public void incrementCorrectProposals() { this.correctProposals++; }
 
 
-    /**
-     * Increments the number of errors by one.
-     */
-    public void incrementErrorCount() {
-        this.errorCount++;
-    }
+    /** Increments the number of errors by one. */
+    public void incrementErrorCount() { this.errorCount++; }
 
 
     /**
@@ -159,9 +119,7 @@ public class PlayerGameState {
      *
      * @param score new score value
      */
-    public void setScore(int score) {
-        this.score = score;
-    }
+    public void setScore(int score) { this.score = score; }
 
 
     /**
@@ -185,30 +143,16 @@ public class PlayerGameState {
     }
 
 
-    /**
-     * Marks the game as won for this player.
-     */
-    public void completeAsWon() {
-        this.finalState = GameResult.WON;
-    }
+    /** Marks the game as won for this player. */
+    public void completeAsWon() { this.finalState = GameResult.WON; }
 
 
-    /**
-     * Marks the game as lost for this player.
-     */
-    public void completeAsLost() {
-        this.finalState = GameResult.LOST;
-    }
+    /** Marks the game as lost for this player. */
+    public void completeAsLost() { this.finalState = GameResult.LOST; }
 
 
-    /**
-     * Checks whether the game is finished.
-     *
-     * @return true if final state is WON or LOST
-     */
-    public boolean isFinished() {
-        return this.finalState != GameResult.NOT_FINISHED;
-    }
+    /** @return true if final state is WON or LOST */
+    public boolean isFinished() { return this.finalState != GameResult.NOT_FINISHED; }
 
 
     /**
