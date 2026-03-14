@@ -5,8 +5,9 @@
 # File di log o temporanei
 *.log
 
-# File dei giocatori
+# File dei giocatori e dei loro stati
 players.json
+gameStates.json
 
 # IDE vari
 # IntelliJ IDEA
