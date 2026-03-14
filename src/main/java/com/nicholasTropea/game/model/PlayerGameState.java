@@ -20,6 +20,9 @@ public class PlayerGameState {
     /** List of words that still need to be grouped. */
     private List<String> remainingWords;
 
+    /** Correctly guessed groups for this game. */
+    private List<List<String>> guessedGroups;
+
     /** Number of mistakes made by the player. */
     private int errorCount;
 
@@ -58,6 +61,7 @@ public class PlayerGameState {
         this.gameId = gameId;
         this.correctProposals = 0;
         this.remainingWords = new ArrayList<>(Objects.requireNonNull(initialWords));
+        this.guessedGroups = new ArrayList<>();
         this.errorCount = 0;
         this.score = 0;
         this.finalState = GameResult.NOT_FINISHED;
@@ -94,6 +98,20 @@ public class PlayerGameState {
      * @return immutable copy of remaining words
      */
     public List<String> getRemainingWords() { return List.copyOf(this.remainingWords); }
+
+
+    /**
+     * Gets correctly guessed groups.
+     *
+     * @return immutable deep copy of guessed groups
+     */
+    public List<List<String>> getGuessedGroups() {
+        List<List<String>> copy = new ArrayList<>();
+        for (List<String> group : this.guessedGroups) {
+            copy.add(List.copyOf(group));
+        }
+        return List.copyOf(copy);
+    }
 
 
     /**
@@ -158,6 +176,16 @@ public class PlayerGameState {
 
 
     /**
+     * Adds a correctly guessed group.
+     *
+     * @param guessedGroup guessed group words
+     */
+    public void addGuessedGroup(List<String> guessedGroup) {
+        this.guessedGroups.add(List.copyOf(Objects.requireNonNull(guessedGroup)));
+    }
+
+
+    /**
      * Marks the game as won for this player.
      */
     public void completeAsWon() {
@@ -191,5 +219,45 @@ public class PlayerGameState {
      */
     public void setRemainingWords(List<String> remainingWords) {
         this.remainingWords = new ArrayList<>(Objects.requireNonNull(remainingWords));
+    }
+
+
+    /**
+     * Restores all mutable progress fields from a persisted snapshot.
+     *
+     * @param correctProposals number of correct proposals
+     * @param errorCount number of wrong proposals
+     * @param score stored game score
+     * @param remainingWords words not yet grouped
+     * @param finalState final game state
+     */
+    public void restoreProgress(
+        int correctProposals,
+        int errorCount,
+        int score,
+        List<String> remainingWords,
+        List<List<String>> guessedGroups,
+        GameResult finalState
+    ) {
+        if (correctProposals < 0) {
+            throw new IllegalArgumentException("correctProposals must be >= 0");
+        }
+        if (errorCount < 0) {
+            throw new IllegalArgumentException("errorCount must be >= 0");
+        }
+
+        this.correctProposals = correctProposals;
+        this.errorCount = errorCount;
+        this.score = score;
+        this.remainingWords = new ArrayList<>(Objects.requireNonNull(remainingWords));
+        this.guessedGroups = new ArrayList<>();
+        if (guessedGroups != null) {
+            for (List<String> group : guessedGroups) {
+                if (group != null) {
+                    this.guessedGroups.add(List.copyOf(group));
+                }
+            }
+        }
+        this.finalState = Objects.requireNonNull(finalState);
     }
 }
