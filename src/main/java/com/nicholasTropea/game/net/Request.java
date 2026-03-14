@@ -1,9 +1,6 @@
 package com.nicholasTropea.game.net;
 
-import com.nicholasTropea.game.net.requests.*;
-
 import java.util.Objects;
-
 import com.google.gson.annotations.SerializedName;
 
 
