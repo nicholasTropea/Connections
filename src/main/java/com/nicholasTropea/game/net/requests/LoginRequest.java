@@ -24,21 +24,15 @@ import com.nicholasTropea.game.net.Request;
  * <p>Possible errors: "incorrect password", "username not registered"
  */
 public class LoginRequest extends Request {
-    /**
-     * The username of the account to log into.
-     */
+    /** The username of the account to log into. */
     @SerializedName("username")
     private final String username;
 
-    /**
-     * The password of the account to log into.
-     */
+    /** The password of the account to log into. */
     @SerializedName("psw")
     private final String password;
 
-    /**
-     * Optional UDP port used by the client to receive async notifications.
-     */
+    /** Optional UDP port used by the client to receive async notifications. */
     @SerializedName("udpPort")
     private final Integer udpPort;
 
@@ -90,14 +84,15 @@ public class LoginRequest extends Request {
      * Validates input and re-prompts on blank entries.
      * 
      * @param scan The Scanner to read user input from
+     * @param udpPort client udp listener port
      * @return A new LoginRequest with the entered credentials
      * @throws IllegalArgumentException if credentials don't meet validation requirements
      */
-    public static LoginRequest createRequest(Scanner scan) {
+    public static LoginRequest createRequest(Scanner scan, int udpPort) {
         String username = getValidInput(scan, "Username");
         String password = getValidInput(scan, "Password");
 
-        return new LoginRequest(username, password);
+        return new LoginRequest(username, password, udpPort);
     }
 
 
@@ -125,27 +120,14 @@ public class LoginRequest extends Request {
     }
 
 
-    // Getters
-    /**
-     * Gets the username for this login request.
-     * 
-     * @return The username
-     */
+    /** @return the username for this login request */
     public String getUsername() { return this.username; }
 
 
-    /**
-     * Gets the password for this login request.
-     * 
-     * @return The password
-     */
+    /** @return the password for this login request */
     public String getPassword() { return this.password; }
 
 
-    /**
-     * Gets the optional UDP port used for async notifications.
-     *
-     * @return UDP port or null if not provided
-     */
+    /** @return UDP port or null if not provided */
     public Integer getUdpPort() { return this.udpPort; }
 }
