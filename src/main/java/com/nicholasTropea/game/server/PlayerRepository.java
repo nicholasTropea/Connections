@@ -188,14 +188,12 @@ public class PlayerRepository {
         if (hasNewPassword) { player.setPassword(newPassword); }
 
         persistPlayers();
-        
+
         return null;
     }
 
 
-    /**
-     * JSON storage structure for persisting repository state.
-     */
+    /** JSON storage structure for persisting repository state. */
     private static class StorageData {
         @SerializedName("nextUserId")
         int nextUserId;
@@ -210,28 +208,20 @@ public class PlayerRepository {
     }
 
 
-    /**
-     * Loads players from persistent storage into memory.
-     */
+    /** Loads players from persistent storage into memory. */
     private void loadPlayers() {
         try {
             if (!Files.exists(this.storageFile)) {
                 Path parent = this.storageFile.getParent();
-                if (parent != null) {
-                    Files.createDirectories(parent);
-                }
+                if (parent != null) { Files.createDirectories(parent); }
                 return;
             }
 
             String content = Files.readString(this.storageFile, StandardCharsets.UTF_8);
-            if (content.trim().isEmpty()) {
-                return;
-            }
+            if (content.trim().isEmpty()) { return; }
 
             StorageData data = this.gson.fromJson(content, StorageData.class);
-            if (data == null || data.players == null) {
-                return;
-            }
+            if (data == null || data.players == null) { return; }
 
             this.nextUserId = data.nextUserId;
             this.playersById.putAll(data.players);
@@ -247,15 +237,11 @@ public class PlayerRepository {
     }
 
 
-    /**
-     * Persists current players map to disk atomically.
-     */
+    /** Persists current players map to disk atomically. */
     private void persistPlayers() {
         try {
             Path parent = this.storageFile.getParent();
-            if (parent != null) {
-                Files.createDirectories(parent);
-            }
+            if (parent != null) { Files.createDirectories(parent); }
 
             Path tempFile = this.storageFile.resolveSibling(
                 this.storageFile.getFileName() + ".tmp"
