@@ -1,5 +1,7 @@
 package com.nicholasTropea.game.server;
 
+import com.nicholasTropea.game.config.ServerConfig;
+
 /**
  * Main entry point for the game server.
  * 
@@ -9,22 +11,30 @@ package com.nicholasTropea.game.server;
  * @author Nicholas Riccardo Tropea
  */
 public class ServerMain {
-    /** Server listening port for TCP connections. */
-    private static final int SERVER_PORT = 5555;
-
-
     /**
      * Starts the server by creating and launching the NetworkManager.
      * 
      * @param args Command line arguments (not used)
      */
     public static void main(String[] args) {
+        ServerConfig config = ServerConfig.loadDefault();
+
         System.out.println("=".repeat(60));
         System.out.println("CONNECTIONS GAME SERVER");
         System.out.println("=".repeat(60));
-        System.out.println("Starting server on port " + SERVER_PORT + "...");
+        System.out.println("Starting server on port " + config.getTcpPort() + "...");
+
+        ServerRuntime runtime = new ServerRuntime(
+            new PlayerRepository(),
+            new GameRepository(),
+            new SessionManager(),
+            config.getRoundDurationMillis(),
+            config.getSessionAutosaveSeconds()
+        );
         
-        NetworkManager netManager = new NetworkManager(ServerMain.SERVER_PORT);
+        Runtime.getRuntime().addShutdownHook(new Thread(runtime::close));
+
+        NetworkManager netManager = new NetworkManager(config.getTcpPort(), runtime);
         new Thread(netManager).start();
         
         System.out.println("Server started successfully!");
