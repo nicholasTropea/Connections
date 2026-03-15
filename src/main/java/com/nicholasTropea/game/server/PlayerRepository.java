@@ -1,16 +1,21 @@
 package com.nicholasTropea.game.server;
 
 import java.io.IOException;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+
 import com.nicholasTropea.game.model.Player;
 
 /**
@@ -41,12 +46,8 @@ public class PlayerRepository {
     private int nextUserId;
 
 
-    /**
-     * Creates a new repository backed by the default storage path.
-     */
-    public PlayerRepository() {
-        this(DEFAULT_STORAGE_PATH);
-    }
+    /** Creates a new repository backed by the default storage path. */
+    public PlayerRepository() { this(DEFAULT_STORAGE_PATH); }
 
 
     /**
@@ -72,9 +73,7 @@ public class PlayerRepository {
      * @return null on success, otherwise an error message
      */
     public synchronized String registerPlayer(String username, String password) {
-        if (isBlank(username) || isBlank(password)) {
-            return "invalid credentials";
-        }
+        if (isBlank(username) || isBlank(password)) { return "invalid credentials"; }
 
         if (this.nicknameToUserId.containsKey(username)) {
             return "username already registered";
@@ -85,6 +84,7 @@ public class PlayerRepository {
         this.playersById.put(userId, newPlayer);
         this.nicknameToUserId.put(username, userId);
         persistPlayers();
+
         return null;
     }
 
@@ -98,18 +98,12 @@ public class PlayerRepository {
      */
     public synchronized String validateLogin(String username, String password) {
         Integer userId = this.nicknameToUserId.get(username);
-        if (userId == null) {
-            return "username not found";
-        }
+        if (userId == null) { return "username not found"; }
 
         Player player = this.playersById.get(userId);
-        if (player == null) {
-            return "username not found";
-        }
+        if (player == null) { return "username not found"; }
 
-        if (!player.getPassword().equals(password)) {
-            return "incorrect password";
-        }
+        if (!player.getPassword().equals(password)) { return "incorrect password"; }
 
         return null;
     }
@@ -139,6 +133,16 @@ public class PlayerRepository {
 
 
     /**
+     * Gets a snapshot list of all registered players.
+     *
+     * @return list containing all players at call time
+     */
+    public synchronized List<Player> getAllPlayers() {
+        return new ArrayList<>(this.playersById.values());
+    }
+
+
+    /**
      * Updates account credentials after verifying old credentials.
      *
      * @param oldUsername current username
@@ -154,18 +158,12 @@ public class PlayerRepository {
         String newPassword
     ) {
         Integer userId = this.nicknameToUserId.get(oldUsername);
-        if (userId == null) {
-            return "user not found";
-        }
+        if (userId == null) { return "user not found"; }
 
         Player player = this.playersById.get(userId);
-        if (player == null) {
-            return "user not found";
-        }
+        if (player == null) { return "user not found"; }
 
-        if (!player.getPassword().equals(oldPassword)) {
-            return "oldPsw not valid";
-        }
+        if (!player.getPassword().equals(oldPassword)) { return "oldPsw not valid"; }
 
         boolean hasNewUsername = !isBlank(newUsername);
         boolean hasNewPassword = !isBlank(newPassword);
@@ -178,7 +176,7 @@ public class PlayerRepository {
             && !oldUsername.equals(newUsername)
             && this.nicknameToUserId.containsKey(newUsername)
         ) {
-            return "newName already registered";
+            return "newName already registered, choose a different one";
         }
 
         if (hasNewUsername && !oldUsername.equals(newUsername)) {
@@ -187,11 +185,10 @@ public class PlayerRepository {
             this.nicknameToUserId.put(newUsername, userId);
         }
 
-        if (hasNewPassword) {
-            player.setPassword(newPassword);
-        }
+        if (hasNewPassword) { player.setPassword(newPassword); }
 
         persistPlayers();
+        
         return null;
     }
 
