@@ -7,37 +7,43 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
- * Gestisce l'ascolto delle connessioni in ingresso e la creazione di thread
- * per i client individuali.
- * 
- * Implementa {@link Runnable} per essere eseguito in un thread separato.
- * Utilizza un {@link ExecutorService} per gestire i {@link ClientHandler}
- * in parallelo.
+ * Listens to incoming connections and creates threads to handle single clients.
+ *
+ * Implements {@link Runnable} so that it can be executed in a separate thread.
+ * Uses an {@link ExecutorService} to handle the {@link ClientHandler} in parallel. 
  * 
  * @author Nicholas Riccardo Tropea
  */
 public class NetworkManager implements Runnable {
-    /** Porta di ascolto del server. */
-    private int port;
+    /** Listening server port. */
+    private final int port;
 
-    /** Pool di thread per i client handler. */
-    private ExecutorService pool;
+    /** Thread pool for client handlers. */
+    private final ExecutorService pool;
+
+    /** Shared runtime containing repositories and coordinators. */
+    private final ServerRuntime runtime;
+
 
     /**
-     * Crea un nuovo NetworkManager con la porta specificata.
+     * Creates a new NetworkManager  with the passed port.
      * 
-     * @param port Porta TCP su cui ascoltare le connessioni
+     * @param port TCP port on which to listen for connections
      */
-    public NetworkManager(int port) {
+    public NetworkManager(int port, ServerRuntime runtime) {
         this.port = port;
         this.pool = Executors.newCachedThreadPool();
+        this.runtime = Objects.requireNonNull(runtime, "runtime is required");
     }
 
-    /** Esegue il listener principale del server. */
+
+    /** Executes the main server listener. */
     @Override
     public void run() { this.start(); }
+
 
     /**
      * Avvia il ServerSocket e inizia l'ascolto delle connessioni.
@@ -46,28 +52,31 @@ public class NetworkManager implements Runnable {
      */
     private void start() {
         try (ServerSocket serverSocket = new ServerSocket(this.port)) {
-            System.out.println("Server attivo sulla porta " + this.port);
+            System.out.println("Server active on port: " + this.port);
             this.listenForConnections(serverSocket);
         }
-        catch (IOException e) { System.err.println("Errore nell'avvio del server: " + e.getMessage()); }
+        catch (IOException e) {
+            System.err.println("Error when starting the server: " + e.getMessage());
+        }
     }
 
+
     /**
-     * Ciclo principale di accettazione delle connessioni client.
+     * Main incoming client connections acceptance cicle
      * 
-     * Per ogni client accettato crea un nuovo {@link ClientHandler}
-     * e lo esegue nel pool di thread.
+     * For each accepted client it creates a new {@link ClientHandler}
+     * and executes it in the thread pool.
      * 
-     * @param serverSocket Socket server già aperto
+     * @param serverSocket Open server socket
      */
     private void listenForConnections(ServerSocket serverSocket) {
         while (true) {
-            try { // Non uso try-with-resources altrimenti la socket viene chiusa subito
+            try { // No try-with-resources otherwise the socket will close
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Connessione da: " + clientSocket.getInetAddress());
                 
-                // Crea un nuovo thread per gestire il client
-                ClientHandler handler = new ClientHandler(clientSocket);
+                // Create a new client handler thread and execute it
+                ClientHandler handler = new ClientHandler(clientSocket, this.runtime);
                 this.pool.execute(handler);
             }
             catch (IOException e) { System.err.println("Errore: " + e.getMessage()); }
