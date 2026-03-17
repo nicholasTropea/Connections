@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.nicholasTropea.game.model.PlayerGameState;
@@ -431,7 +432,10 @@ public class SessionManager {
         PlayerGameState existing = statesByGame.get(gameId);
         if (existing != null) {return existing; }
 
-        PlayerGameState created = new PlayerGameState(userId, gameId, initialWords);
+        List<String> shuffledWords = new ArrayList<>(initialWords);
+        Collections.shuffle(shuffledWords);
+
+        PlayerGameState created = new PlayerGameState(userId, gameId, shuffledWords);
         statesByGame.put(gameId, created);
 
         return created;

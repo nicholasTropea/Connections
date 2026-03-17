@@ -275,7 +275,7 @@ public class ClientHandler implements Runnable {
 
         return LoginResponse.success(
             game.getId(),
-            gameWords,
+            gameState.getRemainingWords(),
             gameState.getGuessedGroups(),
             this.gameRoundCoordinator.getRemainingTimeMillis(),
             gameState.getErrorCount(),
