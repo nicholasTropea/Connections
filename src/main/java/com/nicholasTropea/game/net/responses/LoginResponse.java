@@ -95,7 +95,8 @@ public class LoginResponse extends Response {
      * @param errors Number of errors already made in the current game
      * @param score Score obtained in the current game
      * @return Instance with success=true and error=null
-     * @throws IllegalArgumentException if gameId is out of range or words doesn't contain 16 elements
+    * @throws IllegalArgumentException if gameId is out of range or words list
+    * is malformed
      */
     public static LoginResponse success(
         Integer gameId,
@@ -140,7 +141,7 @@ public class LoginResponse extends Response {
      * Helper function for quick validation of arguments passed to success().
      * 
      * @param gameId ID of the current game
-     * @param words List of words in the current game
+     * @param words List of remaining words in the current game
      * @throws IllegalArgumentException if gameId or words are malformed
      */
     private static void validateSuccess(Integer gameId, List<String> words) {
@@ -150,8 +151,20 @@ public class LoginResponse extends Response {
             throw new IllegalArgumentException("gameId must be between 0 and 911");
         }
 
-        if (words == null || words.size() != 16) {
-            throw new IllegalArgumentException("words must contain 16 words");
+        if (words == null) {
+            throw new IllegalArgumentException("words list is required");
+        }
+
+        if (words.size() > 16) {
+            throw new IllegalArgumentException("words cannot contain more than 16 words");
+        }
+
+        for (String word : words) {
+            if (word == null || word.trim().isEmpty()) {
+                throw new IllegalArgumentException(
+                    "words cannot contain null or blank values"
+                );
+            }
         }
     }
 
