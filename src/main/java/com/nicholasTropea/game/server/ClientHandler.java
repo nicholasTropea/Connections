@@ -633,7 +633,11 @@ public class ClientHandler implements Runnable {
             return SubmitProposalResponse.error("game not found");
         }
 
-        List<String> proposedWords = req.getWords();
+        List<String> proposedWords = 
+            req.getWords().stream()
+                          .map(word -> word.trim().toUpperCase())
+                          .collect(java.util.stream.Collectors.toList());
+
         String malformedError = validateProposal(gameState, game, proposedWords);
         if (malformedError != null) {
             return SubmitProposalResponse.error(malformedError);
@@ -647,8 +651,6 @@ public class ClientHandler implements Runnable {
             gameState.incrementCorrectProposals();
             recalculateScore(gameState);
 
-
-            // Should also remove remaining words
             if (gameState.getCorrectProposals() >= 3) {
                 gameState.completeAsWon();
             }

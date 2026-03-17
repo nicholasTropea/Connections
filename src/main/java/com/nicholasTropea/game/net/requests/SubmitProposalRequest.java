@@ -78,7 +78,7 @@ public class SubmitProposalRequest extends Request {
         String[] order = {"first", "second", "third", "fourth"};
 
         for (int i = 0; i < 4; i++) {
-            words.add(getValidWord(scan, order[i]));
+            words.add(getValidWord(scan, order[i]).toUpperCase().trim());
         }
 
         return new SubmitProposalRequest(words);
