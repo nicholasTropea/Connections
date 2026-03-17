@@ -300,6 +300,10 @@ public class ClientMain {
                 System.out.println("Loss Rate: " + r.getLossRate() + "%");
                 System.out.println("Current Streak: " + r.getCurrentStreak());
                 System.out.println("Max Streak: " + r.getMaxStreak());
+                System.out.println("\nMistake Histogram:");
+                if (r.getHistogram() != null) {
+                    r.getHistogram().print();
+                }
             }
             case SubmitProposalResponse r -> {
                 System.out.println("Proposal Result: " + r.getResult());

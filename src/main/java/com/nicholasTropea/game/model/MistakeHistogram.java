@@ -3,10 +3,12 @@ package com.nicholasTropea.game.model;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Collections;
+import com.google.gson.annotations.SerializedName;
 
 /** Rappresenta l'istogramma delle partite di un giocatore */
 public class MistakeHistogram {
     /** Mappa chiave-valore delle partite */
+    @SerializedName("values")
     private final Map<String, Integer> values;
 
     /** Costruttore */
