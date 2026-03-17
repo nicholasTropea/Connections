@@ -11,15 +11,19 @@ public class LeaderboardRecord {
 
     /** Player position in the leaderboard. */
     private final int position;
+
+    /** Player total points in the leaderboard. */
+    private final int points;
     
     /**
      * Creates a leaderboard record.
      *
      * @param username player username
      * @param position leaderboard position
+     * @param points player total points
      * @throws IllegalArgumentException if username is empty/null or position is less than 1
      */
-    public LeaderboardRecord(String username, int position) {
+    public LeaderboardRecord(String username, int position, int points) {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("username cannot be empty or null");
         }
@@ -29,6 +33,7 @@ public class LeaderboardRecord {
 
         this.username = username;
         this.position = position;
+        this.points = points;
     }
 
     /** Gets the player username. */
@@ -36,4 +41,7 @@ public class LeaderboardRecord {
 
     /** Gets the player position. */
     public int getPosition() { return this.position; }
+
+    /** Gets the player total points. */
+    public int getPoints() { return this.points; }
 }

@@ -868,7 +868,7 @@ public class ClientHandler implements Runnable {
 
         for (int i = 0; i < ranking.size(); i++) {
             LeaderboardEntry entry = ranking.get(i);
-            records.add(new LeaderboardRecord(entry.username, i + 1));
+            records.add(new LeaderboardRecord(entry.username, i + 1, entry.score));
         }
 
         return records;
@@ -892,7 +892,7 @@ public class ClientHandler implements Runnable {
 
         for (int i = 0; i < count; i++) {
             LeaderboardEntry entry = ranking.get(i);
-            records.add(new LeaderboardRecord(entry.username, i + 1));
+            records.add(new LeaderboardRecord(entry.username, i + 1, entry.score));
         }
 
         return LeaderboardResponse.success(records);
@@ -915,7 +915,7 @@ public class ClientHandler implements Runnable {
 
             if (entry.username.equals(username)) {
                 return LeaderboardResponse.success(
-                    List.of(new LeaderboardRecord(entry.username, i + 1))
+                    List.of(new LeaderboardRecord(entry.username, i + 1, entry.score))
                 );
             }
         }

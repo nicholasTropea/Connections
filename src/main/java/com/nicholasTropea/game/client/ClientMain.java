@@ -281,7 +281,13 @@ public class ClientMain {
                 System.out.println("Leaderboard:");
                 r.getRecords().forEach(rec -> 
                     System.out.println(
-                        "  " + rec.getPosition() + ". " + rec.getUsername()
+                        "  "
+                        + rec.getPosition()
+                        + ". "
+                        + rec.getUsername()
+                        + " ("
+                        + rec.getPoints()
+                        + " pts)"
                     )
                 );
             }
