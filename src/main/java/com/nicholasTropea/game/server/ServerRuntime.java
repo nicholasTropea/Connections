@@ -31,6 +31,9 @@ public class ServerRuntime implements AutoCloseable {
     /** Coordinator for the global active game round lifecycle. */
     private final GameRoundCoordinator gameRoundCoordinator;
 
+    /** Persistent storage for global round lifecycle state. */
+    private final GameRoundStateRepository gameRoundStateRepository;
+
     /** Service used to push asynchronous UDP notifications. */
     private final UdpNotificationService udpNotificationService;
 
@@ -108,9 +111,15 @@ public class ServerRuntime implements AutoCloseable {
             sessionManager,
             "sessionManager is required"
         );
+        this.gameRoundStateRepository = new GameRoundStateRepository();
+
+        GameRoundCoordinator.RoundStateSnapshot roundStateSnapshot =
+            this.gameRoundStateRepository.loadSnapshot();
+
         this.gameRoundCoordinator = new GameRoundCoordinator(
             this.gameRepository,
-            roundDurationMillis
+            roundDurationMillis,
+            roundStateSnapshot
         );
         this.udpNotificationService = new UdpNotificationService();
         this.sessionStateRepository = new SessionStateRepository();
@@ -193,6 +202,10 @@ public class ServerRuntime implements AutoCloseable {
             List<SessionManager.GameStateSnapshot> snapshots =
                 this.sessionManager.exportSnapshots();
             this.sessionStateRepository.persistSnapshots(snapshots);
+
+            GameRoundCoordinator.RoundStateSnapshot roundSnapshot =
+                this.gameRoundCoordinator.exportSnapshot();
+            this.gameRoundStateRepository.persistSnapshot(roundSnapshot);
         }
         catch (RuntimeException ex) {
             System.err.println("Session autosave error: " + ex.getMessage());

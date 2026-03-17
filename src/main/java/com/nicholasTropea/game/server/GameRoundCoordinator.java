@@ -16,6 +16,42 @@ import com.nicholasTropea.game.model.Game;
  * rotates to the next game after a fixed duration.
  */
 public class GameRoundCoordinator implements AutoCloseable {
+    /** Immutable snapshot of global round state for persistence. */
+    public static final class RoundStateSnapshot {
+        private final int currentGameId;
+        private final long roundNumber;
+        private final long remainingTimeMillis;
+
+
+        /**
+         * Creates a round-state snapshot.
+         *
+         * @param currentGameId currently active game id
+         * @param roundNumber global round number
+         * @param remainingTimeMillis remaining time for current round
+         */
+        public RoundStateSnapshot(
+            int currentGameId,
+            long roundNumber,
+            long remainingTimeMillis
+        ) {
+            this.currentGameId = currentGameId;
+            this.roundNumber = roundNumber;
+            this.remainingTimeMillis = remainingTimeMillis;
+        }
+
+
+        /** @return currently active game id */
+        public int getCurrentGameId() { return this.currentGameId; }
+
+        /** @return global round number */
+        public long getRoundNumber() { return this.roundNumber; }
+
+        /** @return remaining time for current round in milliseconds */
+        public long getRemainingTimeMillis() { return this.remainingTimeMillis; }
+    }
+
+
     /** Listener for round transitions. */
     @FunctionalInterface
     public interface RoundTransitionListener {
@@ -71,6 +107,22 @@ public class GameRoundCoordinator implements AutoCloseable {
         GameRepository gameRepository,
         long roundDurationMillis
     ) {
+        this(gameRepository, roundDurationMillis, null);
+    }
+
+
+    /**
+     * Creates and starts a new coordinator with optional restored state.
+     *
+     * @param gameRepository repository with preloaded games
+     * @param roundDurationMillis global round duration in milliseconds
+     * @param initialSnapshot optional snapshot to restore from
+     */
+    public GameRoundCoordinator(
+        GameRepository gameRepository,
+        long roundDurationMillis,
+        RoundStateSnapshot initialSnapshot
+    ) {
         this.gameRepository = Objects.requireNonNull(
             gameRepository,
             "gameRepository is required"
@@ -100,12 +152,33 @@ public class GameRoundCoordinator implements AutoCloseable {
         this.currentRoundEndMillis = now + this.roundDurationMillis;
         this.roundNumber = 1L;
 
+        restoreFromSnapshotIfValid(initialSnapshot, now);
+
         this.scheduler.scheduleAtFixedRate(
             this::rotateIfExpiredSafely,
             ROTATION_CHECK_INTERVAL_MS,
             ROTATION_CHECK_INTERVAL_MS,
             TimeUnit.MILLISECONDS
         );
+    }
+
+
+    /**
+     * Exports current global round state for persistence.
+     *
+     * @return snapshot of active game and remaining round time
+     */
+    public RoundStateSnapshot exportSnapshot() {
+        synchronized (this.lock) {
+            long now = System.currentTimeMillis();
+            rotateIfExpiredLocked(now);
+
+            return new RoundStateSnapshot(
+                this.gameIds.get(this.currentGameIndex),
+                this.roundNumber,
+                Math.max(0L, this.currentRoundEndMillis - now)
+            );
+        }
     }
 
 
@@ -259,5 +332,39 @@ public class GameRoundCoordinator implements AutoCloseable {
                 );
             }
         }
+    }
+
+
+    /**
+     * Restores coordinator state from snapshot when compatible with game list.
+     *
+     * @param snapshot snapshot loaded from persistent storage
+     * @param now current epoch milliseconds
+     */
+    private void restoreFromSnapshotIfValid(RoundStateSnapshot snapshot, long now) {
+        if (snapshot == null) { return; }
+
+        int restoredIndex = this.gameIds.indexOf(snapshot.getCurrentGameId());
+        if (restoredIndex < 0) {
+            System.err.println(
+                "Ignoring persisted round state: gameId not found "
+                + snapshot.getCurrentGameId()
+            );
+            
+            return;
+        }
+
+        long restoredRound = snapshot.getRoundNumber();
+        long restoredRemaining = snapshot.getRemainingTimeMillis();
+
+        if (restoredRound < 1L || restoredRemaining <= 0L) {
+            System.err.println("Ignoring persisted round state: invalid values");
+            return;
+        }
+
+        long boundedRemaining = Math.min(restoredRemaining, this.roundDurationMillis);
+        this.currentGameIndex = restoredIndex;
+        this.roundNumber = restoredRound;
+        this.currentRoundEndMillis = now + boundedRemaining;
     }
 }
