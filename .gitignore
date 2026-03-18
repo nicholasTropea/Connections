@@ -5,6 +5,9 @@
 # File di log o temporanei
 *.log
 
+# File lock (WSL)
+*.lck
+
 # File dei giocatori, dei loro stati e stato del server
 players.json
 gameStates.json
