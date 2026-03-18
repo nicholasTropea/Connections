@@ -14,7 +14,9 @@ import java.nio.file.Path;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,6 +43,22 @@ import com.nicholasTropea.game.net.responses.*;
 public class ClientMain {
     /** Client operation logger persisted to file. */
     private static final Logger LOGGER = Logger.getLogger("connections.client.ops");
+
+    /** Queue for pending UDP notifications to avoid interrupting input. */
+    private static final Queue<String> PENDING_NOTIFICATIONS = 
+        new ConcurrentLinkedQueue<>();
+
+
+    /** Tracks current console input phase for safe async notification rendering. */
+    private enum InputMode {
+        IDLE,
+        ACTION_SELECTION,
+        MULTI_FIELD_INPUT
+    }
+
+
+    /** Current input mode shared with UDP listener thread. */
+    private static volatile InputMode currentInputMode = InputMode.IDLE;
 
 
     /** CLI menu actions. */
@@ -109,6 +127,7 @@ public class ClientMain {
                 if (resp == null) { break; }
                 
                 loggedIn = handleResponse(resp, loggedIn);
+                displayPendingNotifications();
             }
 
             System.out.println("Goodbye, hope you had fun!");
@@ -134,6 +153,7 @@ public class ClientMain {
         DatagramSocket udpSocket
     ) {
         while (true) {
+            displayPendingNotifications();
             System.out.println("\nAvailable Actions:");
 
             List<ClientAction> options = buildMenu(loggedIn);
@@ -145,17 +165,25 @@ public class ClientMain {
             System.out.print("\nSelect action (enter code): ");
 
             try {
-                int code = Integer.parseInt(scan.nextLine().trim());
+                currentInputMode = InputMode.ACTION_SELECTION;
+                String selected = scan.nextLine().trim();
+                currentInputMode = InputMode.IDLE;
+
+                int code = Integer.parseInt(selected);
                 if (code < 1 || code > options.size()) {
                     throw new IllegalArgumentException("Invalid selection");
                 }
 
                 ClientAction action = options.get(code - 1);
+                currentInputMode = InputMode.MULTI_FIELD_INPUT;
                 return buildRequestFromAction(action, scan, udpSocket);
             }
             catch (IllegalArgumentException e) {
                 System.out.println("Invalid selection: " + e.getMessage());
                 System.out.println("Please try again.\n");
+            }
+            finally {
+                currentInputMode = InputMode.IDLE;
             }
         }
     }
@@ -304,6 +332,7 @@ public class ClientMain {
                 if (r.getHistogram() != null) {
                     r.getHistogram().print();
                 }
+                displayPendingNotifications();
             }
             case SubmitProposalResponse r -> {
                 System.out.println("Proposal Result: " + r.getResult());
@@ -382,7 +411,21 @@ public class ClientMain {
 
 
     /**
+     * Displays any pending UDP notifications without interrupting input.
+     */
+    private static void displayPendingNotifications() {
+        while (!PENDING_NOTIFICATIONS.isEmpty()) {
+            String notification = PENDING_NOTIFICATIONS.poll();
+            System.out.println("\n[ASYNC UDP NOTIFICATION]");
+            System.out.println(notification);
+        }
+    }
+
+
+    /**
      * Starts a background thread that listens for UDP notifications.
+     * Notifications are queued and displayed at safe points to avoid
+     * interrupting user input.
      *
      * @param udpSocket socket bound to local UDP port
      */
@@ -392,7 +435,10 @@ public class ClientMain {
 
             while (!udpSocket.isClosed()) {
                 try {
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                    DatagramPacket packet = new DatagramPacket(
+                        buffer,
+                        buffer.length
+                    );
                     udpSocket.receive(packet);
                     
                     String json = new String(
@@ -402,10 +448,17 @@ public class ClientMain {
                         StandardCharsets.UTF_8
                     );
 
-                    System.out.println("\n[ASYNC UDP NOTIFICATION]");
-                    System.out.println("Round update received.");
+                    String notification = "Round update received.";
+                    if (currentInputMode == InputMode.ACTION_SELECTION) {
+                        System.out.println("\n[ASYNC UDP NOTIFICATION]");
+                        System.out.println(notification);
+                        System.out.print("\nSelect action (enter code): ");
+                    }
+                    else {
+                        PENDING_NOTIFICATIONS.offer(notification);
+                    }
+
                     LOGGER.info("ASYNC_UDP " + json);
-                    System.out.print("\nSelect action (enter code): ");
                 }
                 catch (IOException ex) {
                     if (!udpSocket.isClosed()) {
