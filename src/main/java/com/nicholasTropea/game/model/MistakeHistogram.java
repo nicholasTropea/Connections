@@ -41,32 +41,79 @@ public class MistakeHistogram {
     /** Stampa l'istogramma */
     public void print() {
         int maxVal = Collections.max(this.values.values());
+        int columnWidth = computeColumnWidth();
 
-        // Parte verticale
-        for (int i = maxVal; i >= 0; i--) {
+        if (maxVal == 0) {
+            System.out.println("No games recorded yet.");
+            return;
+        }
+
+        // Vertical bars
+        for (int i = maxVal; i >= 1; i--) {
             System.out.printf("%2d |  ", i);
 
-            // Una colonna di larghezza prefissata (12 caratteri) per chiave
             for (Map.Entry<String, Integer> e : this.values.entrySet()) {
                 int val = e.getValue();
-
-                // x centrata ad occhio
-                if (val >= i) System.out.print("  #         ");
-                else System.out.print("            ");
+                System.out.print(centeredCell(val >= i, columnWidth));
             }
 
             System.out.println();
         }
 
-        // Parte orizzontale
-        System.out.println("---------------------------------------------------------------------------");
-        System.out.print("     ");
+        // Horizontal axis
+        int separatorLength = 6 + (this.values.size() * columnWidth);
+        System.out.println("-".repeat(separatorLength));
+        System.out.print("      ");
 
         for (Map.Entry<String, Integer> e : this.values.entrySet()) {
             String key = e.getKey();
-            System.out.printf("%-12s", key);
+            System.out.print(centerText(key, columnWidth));
         }
 
         System.out.println();
+        printCountsLegend();
+    }
+
+
+    private void printCountsLegend() {
+        System.out.println();
+        System.out.println("Counts:");
+        for (Map.Entry<String, Integer> entry : this.values.entrySet()) {
+            System.out.printf("  %-12s : %d%n", entry.getKey(), entry.getValue());
+        }
+    }
+
+
+    private int computeColumnWidth() {
+        int maxLabelLength = 0;
+        for (String key : this.values.keySet()) {
+            if (key.length() > maxLabelLength) {
+                maxLabelLength = key.length();
+            }
+        }
+
+        return Math.max(12, maxLabelLength + 2);
+    }
+
+
+    private String centeredCell(boolean filled, int width) {
+        if (!filled) {
+            return " ".repeat(width);
+        }
+
+        int leftPadding = (width - 1) / 2;
+        int rightPadding = width - leftPadding - 1;
+        return " ".repeat(leftPadding) + "#" + " ".repeat(rightPadding);
+    }
+
+
+    private String centerText(String text, int width) {
+        if (text.length() >= width) {
+            return text;
+        }
+
+        int leftPadding = (width - text.length()) / 2;
+        int rightPadding = width - text.length() - leftPadding;
+        return " ".repeat(leftPadding) + text + " ".repeat(rightPadding);
     }
 }
