@@ -50,13 +50,13 @@
           <includePluginDependencies>true</includePluginDependencies>
         </configuration>
       </plugin>
+
     </plugins>
   </build>
 
   <profiles>
     <profile>
       <id>server</id>
-
       <build>
         <plugins>
           <plugin>
@@ -78,7 +78,6 @@
 
     <profile>
       <id>client</id>
-
       <build>
         <plugins>
           <plugin>
@@ -90,6 +89,102 @@
                 <goals><goal>java</goal></goals>
                 <configuration>
                   <mainClass>com.nicholasTropea.game.client.ClientMain</mainClass>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- Profile to build server JAR -->
+    <profile>
+      <id>build-server-jar</id>
+      <build>
+        <finalName>connections-server</finalName>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.3.0</version>
+            <configuration>
+              <archive>
+                <manifest>
+                  <mainClass>com.nicholasTropea.game.server.ServerMain</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.4.2</version>
+            <executions>
+              <execution>
+                <id>assemble-server-jar</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                  </descriptorRefs>
+                  <archive>
+                    <manifest>
+                      <mainClass>com.nicholasTropea.game.server.ServerMain</mainClass>
+                    </manifest>
+                  </archive>
+                  <finalName>connections-server</finalName>
+                  <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- Profile to build client JAR -->
+    <profile>
+      <id>build-client-jar</id>
+      <build>
+        <finalName>connections-client</finalName>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.3.0</version>
+            <configuration>
+              <archive>
+                <manifest>
+                  <mainClass>com.nicholasTropea.game.client.ClientMain</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.4.2</version>
+            <executions>
+              <execution>
+                <id>assemble-client-jar</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                  </descriptorRefs>
+                  <archive>
+                    <manifest>
+                      <mainClass>com.nicholasTropea.game.client.ClientMain</mainClass>
+                    </manifest>
+                  </archive>
+                  <finalName>connections-client</finalName>
+                  <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
               </execution>
             </executions>

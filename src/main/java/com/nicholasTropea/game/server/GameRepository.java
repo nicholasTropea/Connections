@@ -1,6 +1,7 @@
 package com.nicholasTropea.game.server;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -91,7 +92,7 @@ public class GameRepository {
      */
     private void loadGames(Path gamesPath) {
         try {
-            String json = Files.readString(gamesPath, StandardCharsets.UTF_8);
+            String json = loadGamesJson(gamesPath);
             Type listType = new TypeToken<List<Game>>() { }.getType();
             List<Game> loadedGames = new Gson().fromJson(json, listType);
 
@@ -115,13 +116,55 @@ public class GameRepository {
         }
         catch (IOException ex) {
             throw new IllegalStateException(
-                "Failed to read games.json from path: " + gamesPath,
+                "Failed to read games.json from path or classpath: " + gamesPath,
                 ex
             );
         }
         catch (RuntimeException ex) {
             throw new IllegalStateException("Failed to parse games.json", ex);
         }
+    }
+
+
+    /**
+     * Loads games JSON trying filesystem and classpath fallbacks.
+     *
+     * <p>Resolution order:
+     * 1) configured path as-is
+     * 2) parent-directory fallback (useful when running from target/)
+     * 3) classpath resource (strip src/main/resources/ prefix)
+     *
+     * @param configuredPath configured games file path
+     * @return JSON content
+     * @throws IOException if resource cannot be found/read in any location
+     */
+    private static String loadGamesJson(Path configuredPath) throws IOException {
+        if (Files.exists(configuredPath)) {
+            return Files.readString(configuredPath, StandardCharsets.UTF_8);
+        }
+
+        Path parentRelativePath = Path.of("..")
+            .resolve(configuredPath)
+            .normalize();
+        if (Files.exists(parentRelativePath)) {
+            return Files.readString(parentRelativePath, StandardCharsets.UTF_8);
+        }
+
+        String resourcePath = configuredPath.toString().replace('\\', '/');
+        String resourcesPrefix = "src/main/resources/";
+        if (resourcePath.startsWith(resourcesPrefix)) {
+            resourcePath = resourcePath.substring(resourcesPrefix.length());
+        }
+
+        try (InputStream inputStream = GameRepository.class
+            .getClassLoader()
+            .getResourceAsStream(resourcePath)) {
+            if (inputStream != null) {
+                return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            }
+        }
+
+        throw new IOException("games.json not found in filesystem or classpath");
     }
 
 
