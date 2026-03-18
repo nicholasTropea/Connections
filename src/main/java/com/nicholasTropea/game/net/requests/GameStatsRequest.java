@@ -104,18 +104,15 @@ public class GameStatsRequest extends Request {
             "\t- 2: Specific game\n"
         );
 
-        int selection = -1;
+        Integer selection = null;
 
         do {
-            if (selection != -1) {
-                System.out.println("Invalid option: " + selection);
+            if (selection != null) {
+                System.out.println("Invalid option, either select 1 or 2");
             }
 
-            try {
-                selection = Integer.parseInt(scan.nextLine().trim());
-            } catch (NumberFormatException e) {
-                selection = -1;
-            }
+            try { selection = Integer.parseInt(scan.nextLine().trim()); }
+            catch (NumberFormatException e) { selection = -1; }
         } while (selection != 1 && selection != 2);
 
         return selection;
