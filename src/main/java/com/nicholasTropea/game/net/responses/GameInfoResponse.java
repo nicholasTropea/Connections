@@ -33,7 +33,7 @@ public class GameInfoResponse extends Response {
     @SerializedName("active")
     private final boolean active;
 
-    /** Time remaining in the game in milliseconds (null if active=false) */
+    /** Time remaining in the game in milliseconds, if applicable */
     @SerializedName("timeLeft")
     private final Long timeLeft;
 
@@ -94,9 +94,12 @@ public class GameInfoResponse extends Response {
 
 
     /**
-     * Creates a successful game info response.
-     * If active == true: timeLeft and wordsLeft != null, solution == null
-     * If active == false: solution != null, timeLeft and wordsLeft == null
+    * Creates a successful game info response.
+    * If active == true: wordsLeft != null, solution == null
+    * If active == false: solution != null, wordsLeft == null
+    *
+    * <p>timeLeft can be set when the requested game is still globally active,
+    * even if the player has already completed that game.
      * 
      * @param active True if game is current and not finished by player, false otherwise
      * @param timeLeft Time remaining in the game in milliseconds
@@ -139,7 +142,7 @@ public class GameInfoResponse extends Response {
             true,
             null,
             false,
-            null,
+            timeLeft,
             null,
             solution,
             guessedGroups,
@@ -186,7 +189,7 @@ public class GameInfoResponse extends Response {
     /**
      * Gets the time remaining in the game.
      *
-     * @return Time remaining in milliseconds or null if game is not active
+    * @return Time remaining in milliseconds or null if not applicable
      */
     public Long getTimeLeft() { return this.timeLeft; }
 

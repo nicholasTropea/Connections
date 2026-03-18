@@ -154,7 +154,7 @@ public class ClientMain {
     ) {
         while (true) {
             displayPendingNotifications();
-            System.out.println("\nAvailable Actions:");
+            printSectionTitle("Available Actions");
 
             List<ClientAction> options = buildMenu(loggedIn);
 
@@ -265,48 +265,107 @@ public class ClientMain {
     private static void displayResponseDetails(Response resp) { // SHOULD REFACTOR
         switch (resp) {
             case LoginResponse r -> {
-                System.out.println("Login successful.");
+                printSectionTitle("Login Successful");
                 System.out.println("Current Game ID: " + r.getGameId());
                 System.out.println("Time Left: " + formatDuration(r.getTimeLeft()));
-                System.out.println("Errors: " + r.getErrors() + "/4");
-                System.out.println("Score: " + r.getScore());
-                System.out.println("Words:");
-                r.getWords().forEach(word -> System.out.println("  - " + word));
-                System.out.println("Guessed Groups: " + r.getGuessedGroups().size());
-                for (List<String> group : r.getGuessedGroups()) {
-                    System.out.println("  * " + String.join(", ", group));
+                System.out.println("Current Errors: " + r.getErrors() + "/4");
+                System.out.println("Current Score: " + r.getScore());
+                printSeparator();
+
+                if (r.getWords() != null && !r.getWords().isEmpty()) {
+                    System.out.println("Words Available: " + r.getWords().size());
+                    r.getWords().forEach(word -> System.out.println("  - " + word));
+                    printSeparator();
                 }
-            }
-            case GameInfoResponse r -> {
-                System.out.println("Game active: " + r.isActive());
-                if (r.isActive()) {
-                    System.out.println("Time Left: " + formatDuration(r.getTimeLeft()));
-                    System.out.println("Words Left:");
-                    r.getWordsLeft().forEach(word -> System.out.println("  - " + word));
-                }
-                else if (r.getSolution() != null) {
-                    System.out.println("Final Solution:");
-                    for (List<String> group : r.getSolution()) {
+
+                List<List<String>> guessed = r.getGuessedGroups();
+                int guessedCount = guessed == null ? 0 : guessed.size();
+                System.out.println("Correct Groups Found: " + guessedCount);
+                if (guessed != null && !guessed.isEmpty()) {
+                    for (List<String> group : guessed) {
                         System.out.println("  * " + String.join(", ", group));
                     }
                 }
+            }
+            case GameInfoResponse r -> {
+                printSectionTitle("Game Information");
+                if (r.isActive()) {
+                    System.out.println("Status: Active");
+                    System.out.println("Time Left: " + formatDuration(r.getTimeLeft()));
+                    System.out.println("Current Errors: " + r.getErrors() + "/4");
+                    System.out.println("Current Score: " + r.getScore());
+                    printSeparator();
 
-                System.out.println("Guessed Groups: " + r.getGuessedGroups().size());
-                System.out.println("Errors: " + r.getErrors() + "/4");
-                System.out.println("Score: " + r.getScore());
+                    List<String> wordsLeft = r.getWordsLeft();
+                    int wordsLeftCount = wordsLeft == null ? 0 : wordsLeft.size();
+                    System.out.println("Words Left to Group: " + wordsLeftCount);
+                    if (wordsLeft != null && !wordsLeft.isEmpty()) {
+                        wordsLeft.forEach(word -> System.out.println("  - " + word));
+                    }
+                }
+                else {
+                    System.out.println("Status: Completed");
+                    if (r.getTimeLeft() != null) {
+                        System.out.println(
+                            "Time Left (Current Round): " +
+                            formatDuration(r.getTimeLeft())
+                        );
+                    }
+                    System.out.println("Final Errors: " + r.getErrors() + "/4");
+                    System.out.println("Final Score: " + r.getScore());
+                    printSeparator();
+
+                    if (r.getSolution() != null && !r.getSolution().isEmpty()) {
+                        System.out.println("Final Solution:");
+                        for (List<String> group : r.getSolution()) {
+                            System.out.println("  * " + String.join(", ", group));
+                        }
+                        printSeparator();
+                    }
+                }
+
+                List<List<String>> guessedGroups = r.getGuessedGroups();
+                int guessedCount = guessedGroups == null ? 0 : guessedGroups.size();
+                System.out.println("Correct Groups Found: " + guessedCount);
+                if (guessedGroups != null && !guessedGroups.isEmpty()) {
+                    System.out.println("Your Correct Groups:");
+                    for (List<String> group : guessedGroups) {
+                        System.out.println("  * " + String.join(", ", group));
+                    }
+                }
             }
             case GameStatsResponse r -> {
-                System.out.println("Game active: " + r.isActive());
-                System.out.println("Active Players: " + r.getActivePlayers());
-                System.out.println("Finished Players: " + r.getFinishedPlayers());
-                System.out.println("Won Players: " + r.getWonPlayers());
-                if (!r.isActive()) {
+                printSectionTitle("Game Statistics");
+                if (r.isActive()) {
+                    System.out.println("Status: Active");
+                    System.out.println("Time Left: " + formatDuration(r.getTimeLeft()));
+                    System.out.println(
+                        "Players Still Playing: " + r.getActivePlayers()
+                    );
+                    System.out.println("Players Finished: " + r.getFinishedPlayers());
+                    System.out.println("Players Won: " + r.getWonPlayers());
+                    printSeparator();
+                }
+                else {
+                    System.out.println("Status: Completed");
                     System.out.println("Participants: " + r.getTotalPlayers());
-                    System.out.println("Average Score: " + r.getAverageScore());
+                    System.out.println("Players Finished: " + r.getFinishedPlayers());
+                    System.out.println("Players Won: " + r.getWonPlayers());
+                    if (r.getAverageScore() != null) {
+                        System.out.println(
+                            "Average Score: " + String.format("%.2f", r.getAverageScore())
+                        );
+                    }
+                    printSeparator();
                 }
             }
             case LeaderboardResponse r -> {
-                System.out.println("Leaderboard:");
+                printSectionTitle("Leaderboard");
+                if (r.getRecords() == null || r.getRecords().isEmpty()) {
+                    System.out.println("No ranking data available.");
+                    break;
+                }
+
                 r.getRecords().forEach(rec -> 
                     System.out.println(
                         "  "
@@ -320,14 +379,23 @@ public class ClientMain {
                 );
             }
             case PlayerStatsResponse r -> {
-                System.out.println("Solved: " + r.getSolvedPuzzles());
-                System.out.println("Failed: " + r.getFailedPuzzles());
-                System.out.println("Unfinished: " + r.getUnfinishedPuzzles());
-                System.out.println("Perfect: " + r.getPerfectPuzzles());
-                System.out.println("Win Rate: " + r.getWinRate() + "%");
-                System.out.println("Loss Rate: " + r.getLossRate() + "%");
+                printSectionTitle("Player Statistics");
+                int solved = safeInt(r.getSolvedPuzzles());
+                int failed = safeInt(r.getFailedPuzzles());
+                int unfinished = safeInt(r.getUnfinishedPuzzles());
+                int completed = solved + failed + unfinished;
+
+                System.out.println("Puzzles Completed: " + completed);
+                System.out.println("Solved Puzzles: " + solved);
+                System.out.println("Failed Puzzles: " + failed);
+                System.out.println("Unfinished Puzzles: " + unfinished);
+                System.out.println("Perfect Puzzles: " + safeInt(r.getPerfectPuzzles()));
+                System.out.println("Win Rate: " + formatPercentage(r.getWinRate()));
+                System.out.println("Loss Rate: " + formatPercentage(r.getLossRate()));
                 System.out.println("Current Streak: " + r.getCurrentStreak());
                 System.out.println("Max Streak: " + r.getMaxStreak());
+                printSeparator();
+
                 System.out.println("\nMistake Histogram:");
                 if (r.getHistogram() != null) {
                     r.getHistogram().print();
@@ -335,20 +403,24 @@ public class ClientMain {
                 displayPendingNotifications();
             }
             case SubmitProposalResponse r -> {
-                System.out.println("Proposal Result: " + r.getResult());
-                if (r.getResult()) {
+                printSectionTitle("Proposal Result");
+                boolean isCorrect = Boolean.TRUE.equals(r.getResult());
+                System.out.println(
+                    isCorrect ? "Correct group submitted." : "Incorrect group."
+                );
+                if (isCorrect) {
                     System.out.println("Group Name: " + r.getGroupName());
                 }
             }
             default -> {
                 if (resp instanceof LogoutResponse) {
-                    System.out.println("Logout successful.");
+                    printSectionTitle("Logout Successful");
                 }
                 else if (resp instanceof RegisterResponse) {
-                    System.out.println("Registration successful.");
+                    printSectionTitle("Registration Successful");
                 }
                 else if (resp instanceof UpdateCredentialsResponse) {
-                    System.out.println("Credentials updated successfully.");
+                    printSectionTitle("Credentials Updated");
                 }
             }
         }
@@ -392,6 +464,49 @@ public class ClientMain {
         long minutes = totalSeconds / 60L;
         long seconds = totalSeconds % 60L;
         return String.format("%02d:%02d", minutes, seconds);
+    }
+
+
+    /**
+     * Formats percentage values to two decimals and appends percent symbol.
+     *
+     * @param value numeric percentage value
+     * @return formatted value or n/a if null
+     */
+    private static String formatPercentage(Float value) {
+        if (value == null) {
+            return "n/a";
+        }
+
+        return String.format("%.2f%%", value);
+    }
+
+
+    /**
+     * Prints a compact section title for better CLI readability.
+     *
+     * @param title title text
+     */
+    private static void printSectionTitle(String title) {
+        System.out.println("\n[" + title + "]");
+        System.out.println("------------------------------------------------------------");
+    }
+
+
+    /** Prints a visual separator line for content blocks. */
+    private static void printSeparator() {
+        System.out.println("------------------------------------------------------------");
+    }
+
+
+    /**
+     * Returns 0 if boxed integer is null.
+     *
+     * @param value boxed integer
+     * @return integer value or 0
+     */
+    private static int safeInt(Integer value) {
+        return value == null ? 0 : value;
     }
 
 

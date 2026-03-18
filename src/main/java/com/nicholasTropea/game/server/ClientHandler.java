@@ -400,6 +400,7 @@ public class ClientHandler implements Runnable {
         }
 
         boolean isActive = !gameState.isFinished();
+        boolean isCurrentGame = this.gameRoundCoordinator.isCurrentGame(requestedGameId);
         List<List<String>> solution = null;
 
         if (!isActive) {
@@ -413,7 +414,7 @@ public class ClientHandler implements Runnable {
 
         return GameInfoResponse.success(
             isActive,
-            isActive ? this.gameRoundCoordinator.getRemainingTimeMillis() : null,
+            isCurrentGame ? this.gameRoundCoordinator.getRemainingTimeMillis() : null,
             isActive ? gameState.getRemainingWords() : null,
             solution,
             gameState.getGuessedGroups(),
