@@ -14,19 +14,12 @@ import com.google.gson.annotations.SerializedName;
 
 /** Persists and restores historical session/game states. */
 public class SessionStateRepository {
-    /** Default path used for persistent session-state storage. */
-    public static final String DEFAULT_STORAGE_PATH =
-        "src/main/resources/data/gameStates.json";
-
     /** JSON serializer/deserializer. */
     private final Gson gson;
 
     /** Storage file location. */
     private final Path storageFile;
 
-
-    /** Creates repository with default storage path. */
-    public SessionStateRepository() { this(DEFAULT_STORAGE_PATH); }
 
 
     /**

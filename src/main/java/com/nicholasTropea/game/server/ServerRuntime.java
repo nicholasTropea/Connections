@@ -13,12 +13,6 @@ import java.util.concurrent.TimeUnit;
  * dependency injection into connection handlers.
  */
 public class ServerRuntime implements AutoCloseable {
-    /** Default global round duration: 5 minutes. */
-    public static final long DEFAULT_ROUND_DURATION_MS = 300_000L;
-
-    /** Session-state autosave period in seconds. */
-    public static final long DEFAULT_SESSION_AUTOSAVE_SECONDS = 15L;
-
     /** Repository for player persistence and credential validation. */
     private final PlayerRepository playerRepository;
 
@@ -47,42 +41,6 @@ public class ServerRuntime implements AutoCloseable {
     private final long sessionAutosaveSeconds;
 
 
-    /** Creates a runtime with default dependencies and round duration. */
-    public ServerRuntime() {
-        this(
-            new PlayerRepository(),
-            new GameRepository(),
-            new SessionManager(),
-            DEFAULT_ROUND_DURATION_MS,
-            DEFAULT_SESSION_AUTOSAVE_SECONDS
-        );
-    }
-
-
-    /**
-     * Creates a runtime with explicit dependencies.
-     *
-     * @param playerRepository player repository
-     * @param gameRepository game repository
-     * @param sessionManager session manager
-     * @param roundDurationMillis global round duration in milliseconds
-     */
-    public ServerRuntime(
-        PlayerRepository playerRepository,
-        GameRepository gameRepository,
-        SessionManager sessionManager,
-        long roundDurationMillis
-    ) {
-        this(
-            playerRepository,
-            gameRepository,
-            sessionManager,
-            roundDurationMillis,
-            DEFAULT_SESSION_AUTOSAVE_SECONDS
-        );
-    }
-
-
     /**
      * Creates a runtime with explicit dependencies and autosave configuration.
      *
@@ -91,13 +49,17 @@ public class ServerRuntime implements AutoCloseable {
      * @param sessionManager session manager
      * @param roundDurationMillis global round duration in milliseconds
      * @param sessionAutosaveSeconds autosave period in seconds
+     * @param gameStatesFilePath path to game states JSON storage
+     * @param gameRoundStateFilePath path to game round state JSON storage
      */
     public ServerRuntime(
         PlayerRepository playerRepository,
         GameRepository gameRepository,
         SessionManager sessionManager,
         long roundDurationMillis,
-        long sessionAutosaveSeconds
+        long sessionAutosaveSeconds,
+        String gameStatesFilePath,
+        String gameRoundStateFilePath
     ) {
         this.playerRepository = Objects.requireNonNull(
             playerRepository,
@@ -111,7 +73,9 @@ public class ServerRuntime implements AutoCloseable {
             sessionManager,
             "sessionManager is required"
         );
-        this.gameRoundStateRepository = new GameRoundStateRepository();
+        this.gameRoundStateRepository = new GameRoundStateRepository(
+            gameRoundStateFilePath
+        );
 
         GameRoundCoordinator.RoundStateSnapshot roundStateSnapshot =
             this.gameRoundStateRepository.loadSnapshot();
@@ -122,7 +86,7 @@ public class ServerRuntime implements AutoCloseable {
             roundStateSnapshot
         );
         this.udpNotificationService = new UdpNotificationService();
-        this.sessionStateRepository = new SessionStateRepository();
+        this.sessionStateRepository = new SessionStateRepository(gameStatesFilePath);
         this.sessionAutosaveSeconds = sessionAutosaveSeconds;
         this.persistenceScheduler = Executors.newSingleThreadScheduledExecutor(
             runnable -> {
@@ -207,7 +171,7 @@ public class ServerRuntime implements AutoCloseable {
                 this.gameRoundCoordinator.exportSnapshot();
             this.gameRoundStateRepository.persistSnapshot(roundSnapshot);
         }
-        catch (RuntimeException ex) {
+        catch (Throwable ex) {
             System.err.println("Session autosave error: " + ex.getMessage());
         }
     }

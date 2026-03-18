@@ -26,10 +26,6 @@ import com.nicholasTropea.game.model.Player;
  * multiple client handlers operate concurrently.
  */
 public class PlayerRepository {
-    /** Default storage file path used by the server. */
-    public static final String DEFAULT_STORAGE_PATH =
-        "src/main/resources/data/players.json";
-
     /** JSON serializer/deserializer for persistence. */
     private final Gson gson;
 
@@ -46,8 +42,6 @@ public class PlayerRepository {
     private int nextUserId;
 
 
-    /** Creates a new repository backed by the default storage path. */
-    public PlayerRepository() { this(DEFAULT_STORAGE_PATH); }
 
 
     /**

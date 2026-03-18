@@ -12,19 +12,12 @@ import com.google.gson.annotations.SerializedName;
 
 /** Persists and restores the global active round state. */
 public class GameRoundStateRepository {
-    /** Default path used for persistent round-state storage. */
-    public static final String DEFAULT_STORAGE_PATH =
-        "src/main/resources/data/gameRoundState.json";
-
     /** JSON serializer/deserializer. */
     private final Gson gson;
 
     /** Storage file location. */
     private final Path storageFile;
 
-
-    /** Creates repository with default storage path. */
-    public GameRoundStateRepository() { this(DEFAULT_STORAGE_PATH); }
 
 
     /**

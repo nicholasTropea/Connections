@@ -25,11 +25,13 @@ public class ServerMain {
         System.out.println("Starting server on port " + config.getTcpPort() + "...");
 
         ServerRuntime runtime = new ServerRuntime(
-            new PlayerRepository(),
-            new GameRepository(),
+            new PlayerRepository(config.getPlayersFilePath()),
+            new GameRepository(config.getGamesFilePath()),
             new SessionManager(),
             config.getRoundDurationMillis(),
-            config.getSessionAutosaveSeconds()
+            config.getSessionAutosaveSeconds(),
+               config.getGameStatesFilePath(),
+               config.getGameRoundStateFilePath()
         );
         
         Runtime.getRuntime().addShutdownHook(new Thread(runtime::close));

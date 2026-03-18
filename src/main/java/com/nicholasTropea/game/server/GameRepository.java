@@ -22,23 +22,11 @@ import com.nicholasTropea.game.model.Game;
  * Loads and provides access to game definitions from JSON storage.
  */
 public class GameRepository {
-    /** Default storage file path for games catalog. */
-    public static final String DEFAULT_GAMES_PATH =
-        "src/main/resources/data/games.json";
-
     /** Parsed games indexed by gameId for O(1) lookup. */
     private final Map<Integer, Game> gamesById;
 
     /** Sorted game ids to allow deterministic selection by index. */
     private final List<Integer> gameIds;
-
-
-    /**
-     * Creates a game repository loading from the default file path.
-     */
-    public GameRepository() {
-        this(DEFAULT_GAMES_PATH);
-    }
 
 
     /**

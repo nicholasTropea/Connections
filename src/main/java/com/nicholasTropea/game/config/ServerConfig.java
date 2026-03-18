@@ -11,16 +11,28 @@ public final class ServerConfig {
     private final int tcpPort;
     private final long roundDurationMillis;
     private final long sessionAutosaveSeconds;
+    private final String gamesFilePath;
+    private final String playersFilePath;
+    private final String gameStatesFilePath;
+    private final String gameRoundStateFilePath;
 
 
     private ServerConfig(
         int tcpPort,
         long roundDurationMillis,
-        long sessionAutosaveSeconds
+        long sessionAutosaveSeconds,
+        String gamesFilePath,
+        String playersFilePath,
+        String gameStatesFilePath,
+        String gameRoundStateFilePath
     ) {
         this.tcpPort = tcpPort;
         this.roundDurationMillis = roundDurationMillis;
         this.sessionAutosaveSeconds = sessionAutosaveSeconds;
+        this.gamesFilePath = gamesFilePath;
+        this.playersFilePath = playersFilePath;
+        this.gameStatesFilePath = gameStatesFilePath;
+        this.gameRoundStateFilePath = gameRoundStateFilePath;
     }
 
 
@@ -44,11 +56,22 @@ public final class ServerConfig {
             1,
             Long.MAX_VALUE
         );
+        String gamesFilePath = parseString(properties, "gamesFilePath");
+        String playersFilePath = parseString(properties, "playersFilePath");
+        String gameStatesFilePath = parseString(properties, "gameStatesFilePath");
+        String gameRoundStateFilePath = parseString(
+            properties,
+            "gameRoundStateFilePath"
+        );
 
         return new ServerConfig(
             tcpPort,
             roundDurationMillis,
-            sessionAutosaveSeconds
+            sessionAutosaveSeconds,
+            gamesFilePath,
+            playersFilePath,
+            gameStatesFilePath,
+            gameRoundStateFilePath
         );
     }
 
@@ -63,6 +86,18 @@ public final class ServerConfig {
     public long getSessionAutosaveSeconds() {
         return this.sessionAutosaveSeconds;
     }
+
+    /** @return file path for games JSON data */
+    public String getGamesFilePath() { return this.gamesFilePath; }
+
+    /** @return file path for players JSON data */
+    public String getPlayersFilePath() { return this.playersFilePath; }
+
+    /** @return file path for game states JSON data */
+    public String getGameStatesFilePath() { return this.gameStatesFilePath; }
+
+    /** @return file path for game round state JSON data */
+    public String getGameRoundStateFilePath() { return this.gameRoundStateFilePath; }
 
 
     private static int parseInt(
@@ -110,5 +145,17 @@ public final class ServerConfig {
         catch (NumberFormatException ex) {
             throw new IllegalStateException("Invalid long property: " + key, ex);
         }
+    }
+
+
+    private static String parseString(
+        Properties properties,
+        String key
+    ) {
+        String value = properties.getProperty(key);
+        if (value == null) {
+            throw new IllegalStateException("Missing required property: " + key);
+        }
+        return value.trim();
     }
 }
