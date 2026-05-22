@@ -103,10 +103,21 @@ public class ServerRuntime implements AutoCloseable {
             (previousGameId, nextGameId, roundNumber) -> {
                 com.nicholasTropea.game.model.Game prevGame = this.gameRepository.getGameById(previousGameId);
                 java.util.List<java.util.List<String>> solution = prevGame != null 
-                    ? prevGame.getGroups().stream().map(com.nicholasTropea.game.model.Game.Group::getWords).toList() 
+                    ? prevGame.getGroups().stream().map(com.nicholasTropea.game.model.Game.Group::getWords).collect(java.util.stream.Collectors.toList()) 
                     : java.util.Collections.emptyList();
                 
                 SessionManager.GameAggregates stats = this.sessionManager.getGameAggregates(previousGameId);
+
+                // Auto-transition all active sessions to the new round
+                com.nicholasTropea.game.model.Game nextGame = this.gameRepository.getGameById(nextGameId);
+                java.util.List<String> nextWords = java.util.Collections.emptyList();
+                if (nextGame != null) {
+                    nextWords = extractWords(nextGame);
+                    java.util.Collections.shuffle(nextWords); // Shuffle once before broadcast
+                    for (Integer userId : this.sessionManager.getActiveUserIds()) {
+                        this.sessionManager.ensureCurrentGameSession(userId, nextGameId, nextWords);
+                    }
+                }
 
                 this.udpNotificationService.broadcastRoundEnded(
                     previousGameId,
@@ -115,10 +126,26 @@ public class ServerRuntime implements AutoCloseable {
                     solution,
                     stats.getParticipants(),
                     stats.getWonPlayers(),
-                    stats.getAverageScore()
+                    stats.getAverageScore(),
+                    nextWords
                 );
             }
         );
+    }
+
+
+    /**
+     * Extracts all words from a game by flattening its groups.
+     *
+     * @param game game definition
+     * @return list of 16 words
+     */
+    private java.util.List<String> extractWords(com.nicholasTropea.game.model.Game game) {
+        java.util.List<String> words = new java.util.ArrayList<>();
+        for (com.nicholasTropea.game.model.Game.Group group : game.getGroups()) {
+            words.addAll(group.getWords());
+        }
+        return words;
     }
 
 

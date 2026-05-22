@@ -39,10 +39,20 @@ import static com.nicholasTropea.game.client.ConsoleUtils.*;
 public class ClientMain {
     private static final Logger LOGGER = Logger.getLogger("connections.client.ops");
     private static final BlockingQueue<Response> RESPONSE_QUEUE = new LinkedBlockingQueue<>();
-    private static volatile boolean loggedIn = false;
     private static final Gson GSON = new GsonBuilder()
                         .registerTypeAdapter(Response.class, new ResponseDeserializer())
                         .create();
+
+    // UI State
+    private static volatile boolean loggedIn = false;
+    private static String currentUser = "Guest";
+    private static Integer currentGameId = null;
+    private static String lastKnownTime = "N/A";
+    private static int currentScore = 0;
+    private static int currentErrors = 0;
+    private static List<String> currentWords = new ArrayList<>();
+    private static String lastOpMessage = "";
+    private static Response lastDetailedResponse = null;
 
     public static void main(String[] args) {
         configureLogging();
@@ -67,6 +77,7 @@ public class ClientMain {
             startUdpListener(udpSocket);
 
             while (true) {
+                renderDashboard();
                 List<ClientAction> options = buildMenu();
                 displayMenu(options);
                 
@@ -77,7 +88,7 @@ public class ClientMain {
                 try {
                     int code = Integer.parseInt(selected);
                     if (code < 1 || code > options.size()) {
-                        printError("Invalid selection. Please try again.");
+                        lastOpMessage = RED + "Invalid selection. Please try again." + RESET;
                         continue;
                     }
                     
@@ -86,10 +97,15 @@ public class ClientMain {
 
                     Request req = buildRequestFromAction(action, scan, udpSocket.getLocalPort());
                     if (req != null) {
+                        // Only capture username for login to update UI
+                        // Registration should not change the 'currentUser' (Guest)
+                        final String attemptedUser = (req instanceof LoginRequest lr) ? lr.getUsername() : null;
+
                         sendRequest(channel, req);
-                        Response resp = RESPONSE_QUEUE.take(); // Wait for response from NIO thread
-                        handleResponse(resp);
+                        Response resp = RESPONSE_QUEUE.take(); 
+                        handleResponse(resp, attemptedUser, action.label);
                     }
+
                 }
                 catch (NumberFormatException e) {
                     printError("Invalid selection. Please enter a number.");
@@ -107,6 +123,26 @@ public class ClientMain {
         catch (IOException e) {
             printError("Connection error: " + e.getMessage());
             LOGGER.log(Level.SEVERE, "Client error", e);
+        }
+    }
+
+    private static void renderDashboard() {
+        clearScreen();
+        printHeader(currentUser, currentGameId, lastKnownTime, currentScore, currentErrors);
+        
+        if (loggedIn && !currentWords.isEmpty()) {
+            System.out.println(BOLD + "\nCURRENT WORDS TO GROUP:" + RESET);
+            printWordGrid(currentWords);
+        }
+
+        if (lastDetailedResponse != null) {
+            displayResponseDetails(lastDetailedResponse);
+            lastDetailedResponse = null; // Show once as detailed, then keep in header
+        }
+
+        if (!lastOpMessage.isEmpty()) {
+            System.out.println("\n" + lastOpMessage);
+            lastOpMessage = ""; // Clear after display
         }
     }
 
@@ -164,20 +200,27 @@ public class ClientMain {
                     
                     RoundEndedNotification notif = GSON.fromJson(json, RoundEndedNotification.class);
                     if (notif != null && "roundEnded".equals(notif.type)) {
+                        // Update state for the new round
+                        currentGameId = notif.nextGameId;
+                        lastKnownTime = "NEW ROUND";
+                        currentWords = notif.nextWords != null ? new ArrayList<>(notif.nextWords) : new ArrayList<>();
+                        currentErrors = 0;
+                        currentScore = 0;
+                        
+                        lastOpMessage = YELLOW + BOLD + "⚠ ROUND ROTATED! NEW GAME: " + notif.nextGameId + RESET;
+                        
+                        // Detailed summary of the ended game
                         System.out.println("\n");
                         printSectionTitle("Round Ended - Game " + notif.prevGameId);
-                        printInfo("Next Game: " + notif.nextGameId + " (Round " + notif.roundNumber + ")");
-                        
-                        System.out.println(BOLD + "\nGlobal Statistics:" + RESET);
+                        System.out.println(BOLD + "Global Statistics:" + RESET);
                         System.out.printf("Participants: %d | Winners: %d\n", notif.participants, notif.won);
                         System.out.printf("Average Score: %.2f\n", notif.avgScore);
-
                         if (notif.solution != null) {
                             System.out.println(BOLD + "\nSolution for Game " + notif.prevGameId + ":" + RESET);
                             notif.solution.forEach(g -> System.out.println(" • " + String.join(", ", g)));
                         }
                         printSeparator();
-                        System.out.print(BOLD + "\nSelect action (enter code): " + RESET);
+                        System.out.print(BOLD + YELLOW + "\n⚠ ROUND CHANGED! Press [ENTER] to refresh dashboard... " + RESET);
                     }
                 }
                 catch (IOException ignored) {}
@@ -196,6 +239,7 @@ public class ClientMain {
         int participants;
         int won;
         float avgScore;
+        List<String> nextWords;
     }
 
     private static void sendRequest(SocketChannel channel, Request req) throws IOException {
@@ -207,52 +251,52 @@ public class ClientMain {
         LOGGER.info("SENT: " + json.trim());
     }
 
-    private static void handleResponse(Response resp) {
+    private static void handleResponse(Response resp, String attemptedUser, String opLabel) {
         if (!resp.isSuccess()) {
-            printError(resp.getError());
+            lastOpMessage = RED + "✘ [" + opLabel + "] Error: " + resp.getError() + RESET;
             return;
         }
 
-        if (resp instanceof LoginResponse) loggedIn = true;
-        else if (resp instanceof LogoutResponse) loggedIn = false;
+        lastOpMessage = GREEN + "✔ " + opLabel + " successful." + RESET;
+        lastDetailedResponse = resp;
 
-        displayResponseDetails(resp);
+        if (resp instanceof LoginResponse r) {
+            loggedIn = true;
+            currentUser = attemptedUser;
+            currentGameId = r.getGameId();
+            lastKnownTime = formatDuration(r.getTimeLeft());
+            currentScore = r.getScore();
+            currentErrors = r.getErrors();
+            currentWords = r.getWords() != null ? r.getWords() : new ArrayList<>();
+        }
+        else if (resp instanceof LogoutResponse) {
+            loggedIn = false;
+            currentUser = "Guest";
+            currentGameId = null;
+            lastKnownTime = "N/A";
+            currentScore = 0;
+            currentErrors = 0;
+            currentWords.clear();
+        }
+        else if (resp instanceof GameInfoResponse r) {
+            if (r.isActive()) {
+                lastKnownTime = formatDuration(r.getTimeLeft());
+                currentScore = r.getScore();
+                currentErrors = r.getErrors();
+                currentWords = r.getWordsLeft() != null ? r.getWordsLeft() : new ArrayList<>();
+            }
+        }
+        else if (resp instanceof SubmitProposalResponse r) {
+            if (r.getResult()) {
+                lastOpMessage = GREEN + "✔ [" + opLabel + "] CORRECT! Group: " + BOLD + r.getGroupName() + RESET;
+            } else {
+                lastOpMessage = RED + "✘ [" + opLabel + "] INCORRECT PROPOSAL." + RESET;
+            }
+        }
     }
 
     private static void displayResponseDetails(Response resp) {
         switch (resp) {
-            case LoginResponse r -> {
-                printSectionTitle("Login Successful");
-                System.out.println("Game ID: " + BOLD + r.getGameId() + RESET);
-                System.out.println("Time Left: " + BOLD + formatDuration(r.getTimeLeft()) + RESET);
-                System.out.println("Errors: " + RED + r.getErrors() + "/4" + RESET);
-                System.out.println("Score: " + GREEN + r.getScore() + RESET);
-                printWordGrid(r.getWords());
-            }
-            case SubmitProposalResponse r -> {
-                if (r.getResult()) {
-                    printSuccess("Correct! Group: " + BOLD + r.getGroupName() + RESET);
-                } else {
-                    printError("Incorrect proposal.");
-                }
-            }
-            case GameInfoResponse r -> {
-                printSectionTitle("Game Info");
-                if (r.isActive()) {
-                    System.out.println("Status: " + GREEN + "ACTIVE" + RESET);
-                    System.out.println("Time Left: " + BOLD + formatDuration(r.getTimeLeft()) + RESET);
-                    System.out.println("Errors: " + RED + r.getErrors() + "/4" + RESET);
-                    System.out.println("Score: " + GREEN + r.getScore() + RESET);
-                    printWordGrid(r.getWordsLeft());
-                } else {
-                    System.out.println("Status: " + RED + "COMPLETED" + RESET);
-                    System.out.println("Final Score: " + GREEN + r.getScore() + RESET);
-                    if (r.getSolution() != null) {
-                        System.out.println(BOLD + "\nSOLUTION:" + RESET);
-                        r.getSolution().forEach(g -> System.out.println(" • " + String.join(", ", g)));
-                    }
-                }
-            }
             case PlayerStatsResponse r -> {
                 printSectionTitle("Your Statistics");
                 System.out.printf("Solved: %d | Failed: %d | Unfinished: %d\n", r.getSolvedPuzzles(), r.getFailedPuzzles(), r.getUnfinishedPuzzles());
@@ -273,7 +317,27 @@ public class ClientMain {
                     );
                 }
             }
-            default -> printSuccess("Operation completed successfully.");
+            case GameStatsResponse r -> {
+                printSectionTitle("Global Game Stats");
+                if (r.isActive()) {
+                    System.out.println("Active Players: " + r.getActivePlayers());
+                } else {
+                    System.out.println("Total Participants: " + r.getTotalPlayers());
+                    System.out.println("Average Score: " + String.format("%.2f", r.getAverageScore()));
+                }
+                System.out.println("Finished: " + r.getFinishedPlayers() + " | Winners: " + r.getWonPlayers());
+            }
+            case GameInfoResponse r -> {
+                if (!r.isActive()) {
+                    printSectionTitle("Game Summary");
+                    System.out.println("Final Score: " + GREEN + r.getScore() + RESET);
+                    if (r.getSolution() != null) {
+                        System.out.println(BOLD + "\nSOLUTION:" + RESET);
+                        r.getSolution().forEach(g -> System.out.println(" • " + String.join(", ", g)));
+                    }
+                }
+            }
+            default -> {}
         }
     }
 

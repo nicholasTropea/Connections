@@ -55,8 +55,26 @@ public class ConsoleUtils {
         printSeparator();
     }
 
-    /** Clears the current line (approximated for most terminals). */
-    public static void clearLine() {
-        System.out.print("\r" + " ".repeat(80) + "\r");
+    /** Clears the terminal screen. */
+    public static void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+
+    /** Prints a persistent game header with status information. */
+    public static void printHeader(String user, Integer gameId, String timeLeft, int score, int errors) {
+        String statusLine = String.format(
+            " PLAYER: %-10s | GAME: %-3s | TIME: %-5s | SCORE: %-3d | ERRORS: %d/4 ",
+            user, 
+            (gameId == null ? "N/A" : gameId.toString()), 
+            timeLeft, 
+            score, 
+            errors
+        );
+        
+        int len = statusLine.length();
+        System.out.println(BOLD + PURPLE + "╔" + "═".repeat(len) + "╗" + RESET);
+        System.out.println(BOLD + PURPLE + "║" + WHITE + statusLine + PURPLE + "║" + RESET);
+        System.out.println(BOLD + PURPLE + "╚" + "═".repeat(len) + "╝" + RESET);
     }
 }

@@ -269,6 +269,16 @@ public class SessionManager {
 
 
     /**
+     * Gets all user IDs with an active session.
+     *
+     * @return set of active user IDs
+     */
+    public synchronized java.util.Set<Integer> getActiveUserIds() {
+        return new java.util.HashSet<>(this.activeSessions.keySet());
+    }
+
+
+    /**
      * Removes an active session.
      *
      * @param userId player user identifier

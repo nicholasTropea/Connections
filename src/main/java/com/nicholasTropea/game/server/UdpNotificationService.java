@@ -41,6 +41,7 @@ public class UdpNotificationService implements AutoCloseable {
      * @param participants total players
      * @param won total winners
      * @param avgScore average score
+     * @param nextWords words for the new game
      */
     public void broadcastRoundEnded(
         int prevGameId,
@@ -49,10 +50,11 @@ public class UdpNotificationService implements AutoCloseable {
         List<List<String>> solution,
         int participants,
         int won,
-        float avgScore
+        float avgScore,
+        List<String> nextWords
     ) {
         RoundEndedNotification payload = new RoundEndedNotification(
-            prevGameId, nextGameId, roundNumber, solution, participants, won, avgScore
+            prevGameId, nextGameId, roundNumber, solution, participants, won, avgScore, nextWords
         );
         
         String json = this.gson.toJson(payload);
@@ -85,10 +87,12 @@ public class UdpNotificationService implements AutoCloseable {
         @SerializedName("participants") int participants;
         @SerializedName("won") int won;
         @SerializedName("avgScore") float avgScore;
+        @SerializedName("nextWords") List<String> nextWords;
 
-        RoundEndedNotification(int p, int n, long r, List<List<String>> s, int pt, int w, float a) {
+        RoundEndedNotification(int p, int n, long r, List<List<String>> s, int pt, int w, float a, List<String> nw) {
             this.prevGameId = p; this.nextGameId = n; this.roundNumber = r;
             this.solution = s; this.participants = pt; this.won = w; this.avgScore = a;
+            this.nextWords = nw;
         }
     }
 }
