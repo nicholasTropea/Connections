@@ -1,19 +1,19 @@
 package com.nicholasTropea.game.server;
 
-import java.net.ServerSocket;
-import java.net.Socket;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 import java.util.Objects;
+import java.util.Set;
 
 /**
- * Listens to incoming connections and creates threads to handle single clients.
- *
- * Implements {@link Runnable} so that it can be executed in a separate thread.
- * Uses an {@link ExecutorService} to handle the {@link ClientHandler} in parallel. 
+ * Listens for incoming connections and manages them using a NIO Selector.
+ * 
+ * Implements {@link Runnable} to execute the selection loop in a separate thread.
  * 
  * @author Nicholas Riccardo Tropea
  */
@@ -21,65 +21,87 @@ public class NetworkManager implements Runnable {
     /** Listening server port. */
     private final int port;
 
-    /** Thread pool for client handlers. */
-    private final ExecutorService pool;
-
     /** Shared runtime containing repositories and coordinators. */
     private final ServerRuntime runtime;
 
 
     /**
-     * Creates a new NetworkManager  with the passed port.
+     * Creates a new NetworkManager with the passed port.
      * 
      * @param port TCP port on which to listen for connections
+     * @param runtime Shared server runtime dependencies
      */
     public NetworkManager(int port, ServerRuntime runtime) {
         this.port = port;
-        this.pool = Executors.newCachedThreadPool();
         this.runtime = Objects.requireNonNull(runtime, "runtime is required");
     }
 
 
-    /** Executes the main server listener. */
+    /** Executes the main server selection loop. */
     @Override
-    public void run() { this.start(); }
+    public void run() {
+        try (
+            ServerSocketChannel serverChannel = ServerSocketChannel.open();
+            Selector selector = Selector.open()
+        ) {
+            serverChannel.bind(new InetSocketAddress(this.port));
+            serverChannel.configureBlocking(false);
+            serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
+            System.out.println("Server NIO active on port: " + this.port);
 
-    /**
-     * Avvia il ServerSocket e inizia l'ascolto delle connessioni.
-     * 
-     * @throws IOException Se la porta è già occupata o errore di rete
-     */
-    private void start() {
-        try (ServerSocket serverSocket = new ServerSocket(this.port)) {
-            System.out.println("Server active on port: " + this.port);
-            this.listenForConnections(serverSocket);
+            while (!Thread.currentThread().isInterrupted()) {
+                selector.select();
+                Set<SelectionKey> selectedKeys = selector.selectedKeys();
+                Iterator<SelectionKey> iter = selectedKeys.iterator();
+
+                while (iter.hasNext()) {
+                    SelectionKey key = iter.next();
+                    iter.remove();
+
+                    if (!key.isValid()) { continue; }
+
+                    if (key.isAcceptable()) {
+                        handleAccept(serverChannel, selector);
+                    }
+                    else if (key.isReadable()) {
+                        handleRead(key);
+                    }
+                }
+            }
         }
         catch (IOException e) {
-            System.err.println("Error when starting the server: " + e.getMessage());
+            System.err.println("NIO Server error: " + e.getMessage());
         }
     }
 
 
     /**
-     * Main incoming client connections acceptance cicle
-     * 
-     * For each accepted client it creates a new {@link ClientHandler}
-     * and executes it in the thread pool.
-     * 
-     * @param serverSocket Open server socket
+     * Accepts a new client connection and registers it with the selector.
      */
-    private void listenForConnections(ServerSocket serverSocket) {
-        while (true) {
-            try { // No try-with-resources otherwise the socket will close
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("Connessione da: " + clientSocket.getInetAddress());
-                
-                // Create a new client handler thread and execute it
-                ClientHandler handler = new ClientHandler(clientSocket, this.runtime);
-                this.pool.execute(handler);
-            }
-            catch (IOException e) { System.err.println("Errore: " + e.getMessage()); }
+    private void handleAccept(ServerSocketChannel serverChannel, Selector selector) throws IOException {
+        SocketChannel clientChannel = serverChannel.accept();
+        clientChannel.configureBlocking(false);
+        
+        System.out.println("New NIO connection from: " + clientChannel.getRemoteAddress());
+        
+        ClientHandler handler = new ClientHandler(clientChannel, this.runtime);
+        clientChannel.register(selector, SelectionKey.OP_READ, handler);
+    }
+
+
+    /**
+     * Handles a read event from a client channel.
+     */
+    private void handleRead(SelectionKey key) {
+        ClientHandler handler = (ClientHandler) key.attachment();
+        try {
+            handler.handleRead();
+        }
+        catch (IOException e) {
+            System.err.println("Closing client connection: " + e.getMessage());
+            handler.close();
+            key.cancel();
         }
     }
 }

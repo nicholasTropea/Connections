@@ -2,7 +2,7 @@ package com.nicholasTropea.game.server;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 import com.nicholasTropea.game.model.Game;
 
 /**
@@ -86,21 +86,19 @@ public class GameRepository {
 
 
     /**
-     * Loads and validates games from the provided JSON path.
+     * Loads and validates games from the provided JSON path using streaming.
      *
      * @param gamesPath games JSON path
      */
     private void loadGames(Path gamesPath) {
-        try {
-            String json = loadGamesJson(gamesPath);
-            Type listType = new TypeToken<List<Game>>() { }.getType();
-            List<Game> loadedGames = new Gson().fromJson(json, listType);
+        try (InputStream is = openGamesInputStream(gamesPath);
+             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+             JsonReader reader = new JsonReader(isr)) {
 
-            if (loadedGames == null || loadedGames.isEmpty()) {
-                throw new IllegalStateException("No games found in games.json");
-            }
-
-            for (Game game : loadedGames) {
+            Gson gson = new Gson();
+            reader.beginArray();
+            while (reader.hasNext()) {
+                Game game = gson.fromJson(reader, Game.class);
                 validateGame(game);
 
                 int gameId = game.getId();
@@ -110,6 +108,7 @@ public class GameRepository {
 
                 this.gamesById.put(gameId, game);
             }
+            reader.endArray();
 
             this.gameIds.addAll(this.gamesById.keySet());
             Collections.sort(this.gameIds);
@@ -127,7 +126,7 @@ public class GameRepository {
 
 
     /**
-     * Loads games JSON trying filesystem and classpath fallbacks.
+     * Opens an InputStream for games JSON trying filesystem and classpath fallbacks.
      *
      * <p>Resolution order:
      * 1) configured path as-is
@@ -135,19 +134,19 @@ public class GameRepository {
      * 3) classpath resource (strip src/main/resources/ prefix)
      *
      * @param configuredPath configured games file path
-     * @return JSON content
+     * @return InputStream to the JSON content
      * @throws IOException if resource cannot be found/read in any location
      */
-    private static String loadGamesJson(Path configuredPath) throws IOException {
+    private static InputStream openGamesInputStream(Path configuredPath) throws IOException {
         if (Files.exists(configuredPath)) {
-            return Files.readString(configuredPath, StandardCharsets.UTF_8);
+            return Files.newInputStream(configuredPath);
         }
 
         Path parentRelativePath = Path.of("..")
             .resolve(configuredPath)
             .normalize();
         if (Files.exists(parentRelativePath)) {
-            return Files.readString(parentRelativePath, StandardCharsets.UTF_8);
+            return Files.newInputStream(parentRelativePath);
         }
 
         String resourcePath = configuredPath.toString().replace('\\', '/');
@@ -156,12 +155,12 @@ public class GameRepository {
             resourcePath = resourcePath.substring(resourcesPrefix.length());
         }
 
-        try (InputStream inputStream = GameRepository.class
+        InputStream inputStream = GameRepository.class
             .getClassLoader()
-            .getResourceAsStream(resourcePath)) {
-            if (inputStream != null) {
-                return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-            }
+            .getResourceAsStream(resourcePath);
+
+        if (inputStream != null) {
+            return inputStream;
         }
 
         throw new IOException("games.json not found in filesystem or classpath");

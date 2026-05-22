@@ -171,8 +171,6 @@ public class GameRoundCoordinator implements AutoCloseable {
     public RoundStateSnapshot exportSnapshot() {
         synchronized (this.lock) {
             long now = System.currentTimeMillis();
-            rotateIfExpiredLocked(now);
-
             return new RoundStateSnapshot(
                 this.gameIds.get(this.currentGameIndex),
                 this.roundNumber,
@@ -189,7 +187,6 @@ public class GameRoundCoordinator implements AutoCloseable {
      */
     public int getCurrentGameId() {
         synchronized (this.lock) {
-            rotateIfExpiredLocked(System.currentTimeMillis());
             return this.gameIds.get(this.currentGameIndex);
         }
     }
@@ -219,7 +216,6 @@ public class GameRoundCoordinator implements AutoCloseable {
     public long getRemainingTimeMillis() {
         synchronized (this.lock) {
             long now = System.currentTimeMillis();
-            rotateIfExpiredLocked(now);
             return Math.max(0L, this.currentRoundEndMillis - now);
         }
     }
@@ -241,7 +237,6 @@ public class GameRoundCoordinator implements AutoCloseable {
      */
     public long getRoundNumber() {
         synchronized (this.lock) {
-            rotateIfExpiredLocked(System.currentTimeMillis());
             return this.roundNumber;
         }
     }

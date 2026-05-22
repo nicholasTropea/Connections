@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,64 +14,45 @@ import com.google.gson.annotations.SerializedName;
 
 /** Sends asynchronous UDP notifications to subscribed clients. */
 public class UdpNotificationService implements AutoCloseable {
-    /** UDP socket used for outbound notification datagrams. */
     private final DatagramSocket socket;
-
-    /** JSON serializer for notification payloads. */
     private final Gson gson;
-
-    /** Subscribed user endpoints by userId. */
     private final Map<Integer, UdpEndpoint> endpoints;
 
-
-    /** Creates a new UDP notification service. */
     public UdpNotificationService() {
         try { this.socket = new DatagramSocket(); }
-        catch (IOException ex) {
-            throw new IllegalStateException("Cannot create UDP socket", ex);
-        }
-
+        catch (IOException ex) { throw new IllegalStateException("Cannot create UDP socket", ex); }
         this.gson = new Gson();
         this.endpoints = new ConcurrentHashMap<>();
     }
 
-
-    /**
-     * Registers/updates the UDP endpoint for a user.
-     *
-     * @param userId user identifier
-     * @param address client address
-     * @param port client UDP port
-     */
     public void registerEndpoint(int userId, InetAddress address, int port) {
         this.endpoints.put(userId, new UdpEndpoint(address, port));
     }
 
-
-    /**
-     * Removes UDP subscription for a user.
-     *
-     * @param userId user identifier
-     */
     public void unregisterEndpoint(int userId) { this.endpoints.remove(userId); }
 
-
     /**
-     * Broadcasts a round-ended notification to all subscribed users.
-     *
-     * @param previousGameId game that ended
+     * Broadcasts a rich round-ended notification.
+     * 
+     * @param prevGameId game that ended
      * @param nextGameId game that started
-     * @param roundNumber newly active round number
+     * @param roundNumber new round number
+     * @param solution words grouped by theme
+     * @param participants total players
+     * @param won total winners
+     * @param avgScore average score
      */
     public void broadcastRoundEnded(
-        int previousGameId,
+        int prevGameId,
         int nextGameId,
-        long roundNumber
+        long roundNumber,
+        List<List<String>> solution,
+        int participants,
+        int won,
+        float avgScore
     ) {
         RoundEndedNotification payload = new RoundEndedNotification(
-            previousGameId,
-            nextGameId,
-            roundNumber
+            prevGameId, nextGameId, roundNumber, solution, participants, won, avgScore
         );
         
         String json = this.gson.toJson(payload);
@@ -81,77 +63,32 @@ public class UdpNotificationService implements AutoCloseable {
         }
     }
 
-
-    /** Closes underlying UDP socket. */
     @Override
     public void close() { this.socket.close(); }
 
-
-    /**
-     * Sends a UDP datagram to one endpoint.
-     *
-     * @param bytes payload bytes
-     * @param endpoint target endpoint
-     */
     private void sendDatagram(byte[] bytes, UdpEndpoint endpoint) {
-        DatagramPacket packet = new DatagramPacket(
-            bytes,
-            bytes.length,
-            endpoint.address,
-            endpoint.port
-        );
-
+        DatagramPacket packet = new DatagramPacket(bytes, bytes.length, endpoint.address, endpoint.port);
         try { this.socket.send(packet); }
         catch (IOException ex) {
-            System.err.println(
-                "Failed to send UDP notification to "
-                + endpoint.address
-                + ":"
-                + endpoint.port
-                + " - "
-                + ex.getMessage()
-            );
+            System.err.println("UDP Error: " + ex.getMessage());
         }
     }
 
+    private static record UdpEndpoint(InetAddress address, int port) {}
 
-    /** UDP endpoint descriptor. */
-    private static final class UdpEndpoint {
-        private final InetAddress address;
-        private final int port;
+    private static class RoundEndedNotification {
+        @SerializedName("type") String type = "roundEnded";
+        @SerializedName("prevGameId") int prevGameId;
+        @SerializedName("nextGameId") int nextGameId;
+        @SerializedName("roundNumber") long roundNumber;
+        @SerializedName("solution") List<List<String>> solution;
+        @SerializedName("participants") int participants;
+        @SerializedName("won") int won;
+        @SerializedName("avgScore") float avgScore;
 
-
-        private UdpEndpoint(InetAddress address, int port) {
-            this.address = address;
-            this.port = port;
-        }
-    }
-
-
-    /** Payload for asynchronous round-ended notifications. */
-    private static final class RoundEndedNotification {
-        @SerializedName("type")
-        private final String type;
-
-        @SerializedName("previousGameId")
-        private final int previousGameId;
-
-        @SerializedName("nextGameId")
-        private final int nextGameId;
-
-        @SerializedName("roundNumber")
-        private final long roundNumber;
-
-
-        private RoundEndedNotification(
-            int previousGameId,
-            int nextGameId,
-            long roundNumber
-        ) {
-            this.type = "roundEnded";
-            this.previousGameId = previousGameId;
-            this.nextGameId = nextGameId;
-            this.roundNumber = roundNumber;
+        RoundEndedNotification(int p, int n, long r, List<List<String>> s, int pt, int w, float a) {
+            this.prevGameId = p; this.nextGameId = n; this.roundNumber = r;
+            this.solution = s; this.participants = pt; this.won = w; this.avgScore = a;
         }
     }
 }

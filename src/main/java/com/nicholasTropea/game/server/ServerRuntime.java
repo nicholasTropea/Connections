@@ -100,12 +100,24 @@ public class ServerRuntime implements AutoCloseable {
         startSessionStateAutosave();
 
         this.gameRoundCoordinator.addRoundTransitionListener(
-            (previousGameId, nextGameId, roundNumber) ->
+            (previousGameId, nextGameId, roundNumber) -> {
+                com.nicholasTropea.game.model.Game prevGame = this.gameRepository.getGameById(previousGameId);
+                java.util.List<java.util.List<String>> solution = prevGame != null 
+                    ? prevGame.getGroups().stream().map(com.nicholasTropea.game.model.Game.Group::getWords).toList() 
+                    : java.util.Collections.emptyList();
+                
+                SessionManager.GameAggregates stats = this.sessionManager.getGameAggregates(previousGameId);
+
                 this.udpNotificationService.broadcastRoundEnded(
                     previousGameId,
                     nextGameId,
-                    roundNumber
-                )
+                    roundNumber,
+                    solution,
+                    stats.getParticipants(),
+                    stats.getWonPlayers(),
+                    stats.getAverageScore()
+                );
+            }
         );
     }
 
